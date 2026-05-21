@@ -1,0 +1,174 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" role="img" aria-labelledby="title desc">
+  <title id="title">Chris Wow Addon logo</title>
+  <desc id="desc">An original fantasy addon logo with red flame and teal spirit swirls, a gold crest, and a central demon blade rune.</desc>
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="47%" r="64%">
+      <stop offset="0%" stop-color="#18232b"/>
+      <stop offset="46%" stop-color="#06070a"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </radialGradient>
+
+    <radialGradient id="redPaint" cx="33%" cy="43%" r="55%">
+      <stop offset="0%" stop-color="#ff6b3d"/>
+      <stop offset="32%" stop-color="#b41912"/>
+      <stop offset="72%" stop-color="#3f0808"/>
+      <stop offset="100%" stop-color="#050000"/>
+    </radialGradient>
+
+    <radialGradient id="tealPaint" cx="70%" cy="43%" r="58%">
+      <stop offset="0%" stop-color="#bff5ee"/>
+      <stop offset="26%" stop-color="#317f79"/>
+      <stop offset="70%" stop-color="#0a2b2d"/>
+      <stop offset="100%" stop-color="#000606"/>
+    </radialGradient>
+
+    <linearGradient id="gold" x1="197" y1="163" x2="998" y2="1041" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#fff0a8"/>
+      <stop offset="19%" stop-color="#c57a24"/>
+      <stop offset="50%" stop-color="#4b2610"/>
+      <stop offset="78%" stop-color="#d8a342"/>
+      <stop offset="100%" stop-color="#fff7be"/>
+    </linearGradient>
+
+    <linearGradient id="darkGold" x1="332" y1="279" x2="868" y2="760" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#402010"/>
+      <stop offset="43%" stop-color="#d59838"/>
+      <stop offset="100%" stop-color="#221109"/>
+    </linearGradient>
+
+    <linearGradient id="blade" x1="584" y1="121" x2="633" y2="401" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#f5fffa"/>
+      <stop offset="30%" stop-color="#8df8ff"/>
+      <stop offset="68%" stop-color="#0e92a4"/>
+      <stop offset="100%" stop-color="#06292f"/>
+    </linearGradient>
+
+    <linearGradient id="letterGold" x1="318" y1="820" x2="897" y2="1008" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#fff7c4"/>
+      <stop offset="22%" stop-color="#c47d23"/>
+      <stop offset="47%" stop-color="#fff0a5"/>
+      <stop offset="72%" stop-color="#a75c1c"/>
+      <stop offset="100%" stop-color="#f4c561"/>
+    </linearGradient>
+
+    <filter id="drop" x="-18%" y="-18%" width="136%" height="136%">
+      <feDropShadow dx="0" dy="20" stdDeviation="18" flood-color="#000000" flood-opacity=".72"/>
+    </filter>
+
+    <filter id="hotGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="7" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0.55 0 0 0 0 0.05 0 0 0 0 0.03 0 0 0 .72 0"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="spiritGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="7" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.12 0 0 0 0 0.82 0 0 0 0 0.78 0 0 0 .7 0"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="bladeGlow" x="-55%" y="-55%" width="210%" height="210%">
+      <feGaussianBlur stdDeviation="9" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.12 0 0 0 0 0.95 0 0 0 0 1 0 0 0 .9 0"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="1200" fill="url(#bg)"/>
+  <circle cx="600" cy="568" r="518" fill="#020303"/>
+
+  <g opacity=".92">
+    <path d="M594 52C428 72 264 146 167 277 67 412 48 590 112 743c50 122 142 204 250 251-116-123-155-266-112-415 42-145 148-260 281-319 93-41 196-54 302-38C765 104 686 60 594 52Z" fill="url(#redPaint)"/>
+    <path d="M95 605c54 53 116 72 188 54-76 47-123 113-141 199-64-73-91-159-82-257 11-119 63-222 156-309-38 92-42 190-121 313Z" fill="#e23b2e" opacity=".56"/>
+    <path d="M182 250c137-106 290-159 459-158 93 0 176 21 250 62-197-31-368 7-513 114-85 63-147 141-188 235-25 57-43 132-48 224-55-155-42-314 40-477Z" fill="#ff2a16" opacity=".5"/>
+    <path d="M303 204c73-54 159-90 260-107-88 49-158 103-211 162-65 73-107 161-127 264-27-119-.1-226 78-319Z" fill="#080000" opacity=".5"/>
+  </g>
+
+  <g opacity=".9">
+    <path d="M606 1148c166-20 330-94 427-225 100-135 119-313 55-466-50-122-142-204-250-251 116 123 155 266 112 415-42 145-148 260-281 319-93 41-196 54-302 38 68 118 147 162 239 170Z" fill="url(#tealPaint)"/>
+    <path d="M1105 595c-54-53-116-72-188-54 76-47 123-113 141-199 64 73 91 159 82 257-11 119-63 222-156 309 38-92 42-190 121-313Z" fill="#9bded7" opacity=".44"/>
+    <path d="M1018 950c-137 106-290 159-459 158-93 0-176-21-250-62 197 31 368-7 513-114 85-63 147-141 188-235 25-57 43-132 48-224 55 155 42 314-40 477Z" fill="#54d4cb" opacity=".45"/>
+    <path d="M897 996c-73 54-159 90-260 107 88-49 158-103 211-162 65-73 107-161 127-264 27 119 0 226-78 319Z" fill="#000908" opacity=".48"/>
+  </g>
+
+  <g fill="none" stroke-linecap="round" opacity=".82">
+    <path d="M127 382c106-184 274-289 506-315 146-16 280 2 400 54" stroke="#d22b1f" stroke-width="21"/>
+    <path d="M1076 819c-106 184-274 289-506 315-146 16-280-2-400-54" stroke="#73ccc4" stroke-width="21"/>
+    <path d="M160 319c134-124 294-191 480-201" stroke="#ff7b49" stroke-width="8"/>
+    <path d="M1040 881c-134 124-294 191-480 201" stroke="#d6fff9" stroke-width="8"/>
+  </g>
+
+  <g opacity=".52" fill="none" stroke="#224a48" stroke-width="7">
+    <path d="M718 132v330"/>
+    <path d="M796 118v369"/>
+    <path d="M874 146v341"/>
+    <path d="M669 212h334"/>
+    <path d="M682 291h354"/>
+    <path d="M708 371h323"/>
+  </g>
+
+  <g filter="url(#drop)">
+    <circle cx="600" cy="530" r="304" fill="#070507" stroke="#080604" stroke-width="38"/>
+    <circle cx="600" cy="530" r="332" fill="none" stroke="url(#gold)" stroke-width="38"/>
+    <circle cx="600" cy="530" r="289" fill="#140706" stroke="url(#darkGold)" stroke-width="17"/>
+    <path d="M358 356c121-85 277-104 416-44" fill="none" stroke="#f3c96a" stroke-width="10" opacity=".75"/>
+    <path d="M831 657c-90 122-260 173-411 117" fill="none" stroke="#6c3413" stroke-width="12" opacity=".75"/>
+  </g>
+
+  <g opacity=".52">
+    <path d="M231 319c66-65 144-96 234-93-82 42-132 104-149 186-12 55 4 110 46 166-87-22-147-74-180-156-5 52 2 100 21 143-69-67-60-167 28-246Z" fill="#090203"/>
+    <path d="M969 319c-66-65-144-96-234-93 82 42 132 104 149 186 12 55-4 110-46 166 87-22 147-74 180-156 5 52-2 100-21 143 69-67 60-167-28-246Z" fill="#020909"/>
+  </g>
+
+  <g filter="url(#bladeGlow)">
+    <path d="M600 86l48 146-37 157-11 34-11-34-37-157 48-146Z" fill="url(#blade)" stroke="#130a04" stroke-width="13" stroke-linejoin="round"/>
+    <path d="M600 96l-77 138 32 74-75-34-44 48 116 35 48 78 48-78 116-35-44-48-75 34 32-74-77-138Z" fill="url(#gold)" stroke="#130a04" stroke-width="11" stroke-linejoin="round"/>
+    <path d="M600 176l34 60-34 102-34-102 34-60Z" fill="#d7fffc" opacity=".95"/>
+    <path d="M600 205l18 31-18 50-18-50 18-31Z" fill="#14bcca"/>
+    <path d="M600 124v256" stroke="#efffff" stroke-width="8" stroke-linecap="round" opacity=".74"/>
+  </g>
+
+  <g>
+    <path d="M271 529l43-38 68 38-68 38-43-38Z" fill="#170b08" stroke="url(#gold)" stroke-width="13" stroke-linejoin="round"/>
+    <path d="M307 529l31-20 31 20-31 20-31-20Z" fill="#f4e7cb" stroke="#7c2f19" stroke-width="7"/>
+    <path d="M929 529l-43-38-68 38 68 38 43-38Z" fill="#071415" stroke="url(#gold)" stroke-width="13" stroke-linejoin="round"/>
+    <path d="M893 529l-31-20-31 20 31 20 31-20Z" fill="#bdf6ef" stroke="#1f716c" stroke-width="7"/>
+  </g>
+
+  <g fill="#f2eadc" stroke="#100807" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M376 449c68-55 139-76 214-63-70 39-112 95-125 168l50-21c-23 58-63 103-120 135l24-68-68 36c9-34 24-69 44-105l-53 17c5-38 16-71 34-99Z" stroke-width="8"/>
+    <path d="M647 414c73 4 129 29 169 76l-71 14 78 57-81 4 51 69c-72-17-124-52-158-105l47 3c-30-37-42-76-35-118Z" stroke-width="8"/>
+    <path d="M575 472c35 19 52 50 51 91-1 50-28 87-80 110 23-36 30-72 20-108-9-30-28-54-57-72 25-22 47-29 66-21Z" stroke-width="7"/>
+  </g>
+
+  <g filter="url(#drop)">
+    <path d="M274 738h652l48 54-48 156H274l-48-156 48-54Z" fill="#121214" stroke="url(#gold)" stroke-width="18" stroke-linejoin="round"/>
+    <path d="M318 785h564l28 33-31 91H321l-31-91 28-33Z" fill="#22242a" stroke="#241107" stroke-width="9"/>
+    <path d="M195 784h214" stroke="url(#gold)" stroke-width="14" stroke-linecap="round"/>
+    <path d="M791 784h214" stroke="url(#gold)" stroke-width="14" stroke-linecap="round"/>
+    <circle cx="600" cy="724" r="54" fill="#123140" stroke="url(#gold)" stroke-width="12"/>
+    <text x="600" y="745" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="44" font-weight="700" fill="#fff5c8" stroke="#090603" stroke-width="4" paint-order="stroke fill">CWA</text>
+    <text x="600" y="887" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="84" font-weight="700" letter-spacing="4" fill="url(#letterGold)" stroke="#080502" stroke-width="6" paint-order="stroke fill">WOW ADDON</text>
+  </g>
+
+  <g opacity=".96">
+    <path d="M384 1018h432" stroke="#b8fff7" stroke-width="4" stroke-linecap="round"/>
+    <path d="M360 1018l23-9 23 9-23 9-23-9Z" fill="#b8fff7"/>
+    <path d="M840 1018l-23-9-23 9 23 9 23-9Z" fill="#b8fff7"/>
+    <text x="600" y="1000" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="35" letter-spacing="12" fill="#b8fff7">TITAN REFORGED</text>
+  </g>
+
+  <g filter="url(#bladeGlow)">
+    <path d="M600 1061l26 42-15 59-11 18-11-18-15-59 26-42Z" fill="#29d7d8" stroke="#0d1a1c" stroke-width="8" stroke-linejoin="round"/>
+    <path d="M600 1080v78" stroke="#eaffff" stroke-width="5" stroke-linecap="round"/>
+  </g>
+</svg>

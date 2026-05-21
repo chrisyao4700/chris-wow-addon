@@ -1,0 +1,11 @@
+## Interface: 38001
+## Title: Chris Wow Addon
+## Notes: Titan Reforged addon built with TypeScriptToLua.
+## Author: Chris Yao
+## Version: @project-version@
+## SavedVariables: ChrisWowAddonDB
+## X-Curse-Project-ID: 0
+## X-License: MIT
+## X-Flavor: Titan Reforged Classic
+
+main.lua
