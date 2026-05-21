@@ -1,7 +1,10 @@
+import { printActionLayoutStatus, syncActionLayout } from "./action-layout";
 import { SLASH_ALIASES, SLASH_COMMAND } from "./config";
 import { getLaunchCount, resetLaunchCount } from "./db";
 import { getMessages } from "./localization";
 import { addonPrint, getRuntimeInfo, RuntimeInfo } from "./platform/wow";
+
+let openSettingsPanel: (() => void) | undefined;
 
 function valueOrUnknown(value: number | string | boolean | undefined): string {
   if (value === undefined) {
@@ -24,6 +27,10 @@ function printRuntimeInfo(messages: ReturnType<typeof getMessages>, info: Runtim
   addonPrint(messages.debugLine("Titan interface", valueOrUnknown(info.isTitanInterface)));
 }
 
+export function printDebugInfo(): void {
+  printRuntimeInfo(getMessages(), getRuntimeInfo());
+}
+
 function handleSlashCommand(message?: string): void {
   const messages = getMessages();
   const command = message || "";
@@ -40,14 +47,31 @@ function handleSlashCommand(message?: string): void {
   }
 
   if (command === "debug") {
-    printRuntimeInfo(messages, getRuntimeInfo());
+    printDebugInfo();
+    return;
+  }
+
+  if (command === "layout") {
+    syncActionLayout(true);
+    printActionLayoutStatus();
+    return;
+  }
+
+  if (command === "options" || command === "settings") {
+    if (openSettingsPanel !== undefined) {
+      openSettingsPanel();
+      return;
+    }
+
+    addonPrint(messages.settingsUnavailable);
     return;
   }
 
   addonPrint(messages.help);
 }
 
-export function registerSlashCommands(): void {
+export function registerSlashCommands(settingsPanelOpener?: () => void): void {
+  openSettingsPanel = settingsPanelOpener;
   _G.SLASH_CHRISWOWADDON1 = SLASH_ALIASES.short;
   _G.SLASH_CHRISWOWADDON2 = SLASH_ALIASES.full;
   SlashCmdList[SLASH_COMMAND] = handleSlashCommand;

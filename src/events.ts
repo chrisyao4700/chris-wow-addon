@@ -1,5 +1,5 @@
 import { ADDON_NAME } from "./config";
-import { ensureSavedVariables, incrementLaunchCount } from "./db";
+import { ensureSavedVariables, getSettings, incrementLaunchCount } from "./db";
 import { getMessages } from "./localization";
 import { addonPrint } from "./platform/wow";
 
@@ -17,7 +17,10 @@ export function registerAddonEvents(): void {
 
     if (eventName === "PLAYER_LOGIN") {
       incrementLaunchCount();
-      addonPrint(getMessages().loaded);
+
+      if (getSettings().showLoginMessage) {
+        addonPrint(getMessages().loaded);
+      }
     }
   });
 }

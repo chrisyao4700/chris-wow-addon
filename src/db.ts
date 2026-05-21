@@ -1,5 +1,13 @@
+export type ChrisWowAddonSettings = {
+  showMinimapButton?: boolean;
+  showLoginMessage?: boolean;
+  minimapButtonAngle?: number;
+  enableCustomActionLayout?: boolean;
+};
+
 export type ChrisWowAddonState = {
   launches?: number;
+  settings?: ChrisWowAddonSettings;
 };
 
 declare let ChrisWowAddonDB: ChrisWowAddonState | undefined;
@@ -10,6 +18,61 @@ export function ensureSavedVariables(): ChrisWowAddonState {
   }
 
   return ChrisWowAddonDB;
+}
+
+export function getSettings(): Required<ChrisWowAddonSettings> {
+  const state = ensureSavedVariables();
+
+  if (state.settings === undefined) {
+    state.settings = {};
+  }
+
+  return {
+    showMinimapButton: state.settings.showMinimapButton !== false,
+    showLoginMessage: state.settings.showLoginMessage !== false,
+    minimapButtonAngle: state.settings.minimapButtonAngle ?? 45,
+    enableCustomActionLayout: state.settings.enableCustomActionLayout !== false
+  };
+}
+
+export function setShowMinimapButton(showMinimapButton: boolean): void {
+  const state = ensureSavedVariables();
+
+  if (state.settings === undefined) {
+    state.settings = {};
+  }
+
+  state.settings.showMinimapButton = showMinimapButton;
+}
+
+export function setShowLoginMessage(showLoginMessage: boolean): void {
+  const state = ensureSavedVariables();
+
+  if (state.settings === undefined) {
+    state.settings = {};
+  }
+
+  state.settings.showLoginMessage = showLoginMessage;
+}
+
+export function setMinimapButtonAngle(minimapButtonAngle: number): void {
+  const state = ensureSavedVariables();
+
+  if (state.settings === undefined) {
+    state.settings = {};
+  }
+
+  state.settings.minimapButtonAngle = minimapButtonAngle;
+}
+
+export function setEnableCustomActionLayout(enableCustomActionLayout: boolean): void {
+  const state = ensureSavedVariables();
+
+  if (state.settings === undefined) {
+    state.settings = {};
+  }
+
+  state.settings.enableCustomActionLayout = enableCustomActionLayout;
 }
 
 export function getLaunchCount(): number {

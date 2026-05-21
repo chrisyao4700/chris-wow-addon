@@ -14,11 +14,14 @@ const args = new Set(process.argv.slice(2));
 const paths = {
   buildLua: join(root, "build", "main.lua"),
   rootLua: join(root, "main.lua"),
+  assets: join(root, "assets"),
   tocTemplate: join(root, `${addonName}.toc`),
   dist: join(root, "dist"),
   distAddon: join(root, "dist", addonName),
   zip: join(root, "dist", `${addonName}-${version}.zip`)
 };
+
+const runtimeAssets = ["addon-logo.tga"];
 
 async function clean() {
   await rm(join(root, "build"), { recursive: true, force: true });
@@ -61,6 +64,13 @@ async function copyBuildArtifacts() {
   validateToc(renderedToc);
   await writeFile(join(paths.distAddon, `${addonName}.toc`), renderedToc);
   await copyFile(paths.rootLua, join(paths.distAddon, "main.lua"));
+
+  const distAssets = join(paths.distAddon, "assets");
+  await mkdir(distAssets, { recursive: true });
+
+  for (const asset of runtimeAssets) {
+    await copyFile(join(paths.assets, asset), join(distAssets, asset));
+  }
 }
 
 function zipDist() {

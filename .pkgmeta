@@ -16,3 +16,5 @@ ignore:
   - scripts
   - src
   - tsconfig.json
+  - assets/addon-logo.png
+  - assets/logo.svg

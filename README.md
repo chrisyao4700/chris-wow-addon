@@ -16,6 +16,20 @@ npm run build
 npm run package
 ```
 
+## Dev loop (build + install + watch)
+
+For day-to-day work, run the dev watcher. It builds the addon, copies it into your WoW `AddOns` folder, then keeps watching TypeScript, assets, and the TOC. After each change, run `/reload` in-game to see updates.
+
+```sh
+npm run dev
+```
+
+Override the install path if needed (same as `install:addon`):
+
+```sh
+WOW_ADDONS_DIR="/Applications/World of Warcraft/_classic_titan_/Interface/AddOns" npm run dev
+```
+
 The TypeScript entry point is `src/main.ts`. Builds generate:
 
 - `build/main.lua`: raw TypeScriptToLua output.
@@ -33,11 +47,13 @@ This project targets a macOS dev setup. Battle.net installs World of Warcraft un
 
 `npm run install:addon` scans `/Applications/World of Warcraft` for flavor folders (names like `_classic_titan_`) and uses the first `Interface` folder it finds, preferring `_classic_titan_`.
 
-Build and copy the addon into that folder:
+Build and copy the addon into that folder (one-shot, no watch):
 
 ```sh
 npm run install:addon
 ```
+
+For continuous sync while editing, prefer `npm run dev` instead.
 
 If your AddOns path is different, override it:
 
@@ -52,9 +68,11 @@ Then launch or reload WoW and try:
 /cwa stats
 /cwa reset
 /cwa debug
+/cwa options
 ```
 
 `/cwa debug` prints the client build, interface number, locale, project id, and whether the loaded client matches the Titan interface expected by this addon.
+`/cwa options` opens the addon's settings panel. The round minimap logo button opens the same panel with left-click, prints debug info with right-click, and can be dragged around the minimap edge.
 
 ## CurseForge Packaging
 
