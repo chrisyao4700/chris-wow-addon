@@ -11,7 +11,12 @@ type Messages = {
   launchCount(count: number): string;
   showMinimapButton: string;
   showLoginMessage: string;
+  settingsFeaturesHeader: string;
   enableCustomActionLayout: string;
+  enableSpellTextEffect: string;
+  enableDemonSlayerUnitFrames: string;
+  enableDemonSlayerSystemButtons: string;
+  featureDisabled: (featureName: string) => string;
   resetLaunchCount: string;
   printDebugInfo: string;
   minimapTooltipTitle: string;
@@ -20,7 +25,7 @@ type Messages = {
 };
 
 const enUS: Messages = {
-  help: "Commands: /cwa, /cwa stats, /cwa reset, /cwa debug, /cwa layout, /cwa options",
+  help: "Commands: /cwa, /cwa stats, /cwa reset, /cwa debug, /cwa layout, /cwa effect, /cwa effect test, /cwa frames, /cwa buttons, /cwa options",
   loaded: "loaded. Try /cwa.",
   reset: "Saved launch count reset.",
   stats: count => `Loaded ${count} time(s) on this account.`,
@@ -32,7 +37,12 @@ const enUS: Messages = {
   launchCount: count => `Launch count: ${count}`,
   showMinimapButton: "Show minimap button",
   showLoginMessage: "Show login message",
-  enableCustomActionLayout: "Use compact action bar layout",
+  settingsFeaturesHeader: "Features",
+  enableCustomActionLayout: "Compact action bar layout",
+  enableSpellTextEffect: "Spell text on cast",
+  enableDemonSlayerUnitFrames: "Demon Slayer player/target frames",
+  enableDemonSlayerSystemButtons: "Demon Slayer menu bar buttons",
+  featureDisabled: featureName => `${featureName} is disabled in addon settings.`,
   resetLaunchCount: "Reset launch count",
   printDebugInfo: "Print debug info",
   minimapTooltipTitle: "Chris Wow Addon",
@@ -41,7 +51,7 @@ const enUS: Messages = {
 };
 
 const zhCN: Messages = {
-  help: "命令：/cwa、/cwa stats、/cwa reset、/cwa debug、/cwa layout、/cwa options",
+  help: "命令：/cwa、/cwa stats、/cwa reset、/cwa debug、/cwa layout、/cwa effect、/cwa effect test、/cwa frames、/cwa buttons、/cwa options",
   loaded: "已加载。输入 /cwa 查看命令。",
   reset: "已重置加载次数。",
   stats: count => `此账号已加载 ${count} 次。`,
@@ -53,7 +63,12 @@ const zhCN: Messages = {
   launchCount: count => `加载次数：${count}`,
   showMinimapButton: "显示小地图按钮",
   showLoginMessage: "显示登录提示",
-  enableCustomActionLayout: "使用紧凑动作条布局",
+  settingsFeaturesHeader: "功能",
+  enableCustomActionLayout: "紧凑动作条布局",
+  enableSpellTextEffect: "施法时显示技能文字",
+  enableDemonSlayerUnitFrames: "鬼灭之刃风格玩家/目标框体",
+  enableDemonSlayerSystemButtons: "鬼灭之刃风格菜单栏按钮",
+  featureDisabled: featureName => `${featureName} 已在插件设置中关闭。`,
   resetLaunchCount: "重置加载次数",
   printDebugInfo: "输出调试信息",
   minimapTooltipTitle: "Chris Wow Addon",

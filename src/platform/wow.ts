@@ -1,4 +1,4 @@
-import { ADDON_NAME, TITAN_INTERFACE_VERSION } from "../config";
+import { ADDON_NAME, TITAN_INTERFACE_VERSION } from "../core/config";
 
 export type RuntimeInfo = {
   version: string;

@@ -1,7 +1,7 @@
 import { ADDON_NAME } from "./config";
 import { ensureSavedVariables, getSettings, incrementLaunchCount } from "./db";
 import { getMessages } from "./localization";
-import { addonPrint } from "./platform/wow";
+import { addonPrint } from "../platform/wow";
 
 export function registerAddonEvents(): void {
   const frame = CreateFrame("Frame");

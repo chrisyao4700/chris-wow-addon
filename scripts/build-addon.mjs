@@ -71,6 +71,12 @@ async function copyBuildArtifacts() {
   for (const asset of runtimeAssets) {
     await copyFile(join(paths.assets, asset), join(distAssets, asset));
   }
+
+  const systemButtonAssetsDir = join(paths.assets, "system-buttons");
+
+  if (existsSync(systemButtonAssetsDir)) {
+    await cp(systemButtonAssetsDir, join(distAssets, "system-buttons"), { recursive: true });
+  }
 }
 
 function zipDist() {

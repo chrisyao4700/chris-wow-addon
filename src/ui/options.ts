@@ -1,27 +1,40 @@
-import { syncActionLayout } from "./action-layout";
-import { ADDON_TITLE } from "./config";
+import { printDebugInfo } from "../commands";
+import { ADDON_TITLE } from "../core/config";
 import {
   getLaunchCount,
   getSettings,
   resetLaunchCount,
   setEnableCustomActionLayout,
+  setEnableDemonSlayerSystemButtons,
+  setEnableDemonSlayerUnitFrames,
+  setEnableSpellTextEffect,
   setShowLoginMessage,
   setShowMinimapButton
-} from "./db";
-import { getMessages } from "./localization";
-import { addonPrint } from "./platform/wow";
-import { printDebugInfo } from "./commands";
+} from "../core/db";
+import { getMessages } from "../core/localization";
+import { syncActionLayout } from "../features/action-layout";
+import { syncSpellTextEffect } from "../features/spell-text-effect";
+import { syncDemonSlayerSystemButtons } from "../features/system-buttons";
+import { syncDemonSlayerUnitFrames } from "../features/unit-frames";
+import { addonPrint } from "../platform/wow";
 
 type SettingsPanelHandlers = {
   onMinimapVisibilityChanged: () => void;
   onActionLayoutChanged: () => void;
+  onSpellTextEffectChanged: () => void;
+  onDemonSlayerUnitFramesChanged: () => void;
+  onDemonSlayerSystemButtonsChanged: () => void;
 };
 
 type SettingsPanelControls = {
   launchCount?: WowFontString;
+  featuresHeader?: WowFontString;
+  actionLayoutCheckbox?: WowCheckButton;
+  spellTextEffectCheckbox?: WowCheckButton;
+  demonSlayerUnitFramesCheckbox?: WowCheckButton;
+  demonSlayerSystemButtonsCheckbox?: WowCheckButton;
   minimapCheckbox?: WowCheckButton;
   loginCheckbox?: WowCheckButton;
-  actionLayoutCheckbox?: WowCheckButton;
 };
 
 let panel: WowOptionsPanel | undefined;
@@ -107,16 +120,28 @@ export function refreshSettingsPanel(): void {
     controls.launchCount.SetText(messages.launchCount(getLaunchCount()));
   }
 
+  if (controls.actionLayoutCheckbox !== undefined) {
+    controls.actionLayoutCheckbox.SetChecked(settings.enableCustomActionLayout);
+  }
+
+  if (controls.spellTextEffectCheckbox !== undefined) {
+    controls.spellTextEffectCheckbox.SetChecked(settings.enableSpellTextEffect);
+  }
+
+  if (controls.demonSlayerUnitFramesCheckbox !== undefined) {
+    controls.demonSlayerUnitFramesCheckbox.SetChecked(settings.enableDemonSlayerUnitFrames);
+  }
+
+  if (controls.demonSlayerSystemButtonsCheckbox !== undefined) {
+    controls.demonSlayerSystemButtonsCheckbox.SetChecked(settings.enableDemonSlayerSystemButtons);
+  }
+
   if (controls.minimapCheckbox !== undefined) {
     controls.minimapCheckbox.SetChecked(settings.showMinimapButton);
   }
 
   if (controls.loginCheckbox !== undefined) {
     controls.loginCheckbox.SetChecked(settings.showLoginMessage);
-  }
-
-  if (controls.actionLayoutCheckbox !== undefined) {
-    controls.actionLayoutCheckbox.SetChecked(settings.enableCustomActionLayout);
   }
 }
 
@@ -197,15 +222,86 @@ export function registerSettingsPanel(settingsPanelHandlers: SettingsPanelHandle
     -72
   );
 
+  controls.featuresHeader = createLabel(
+    optionsPanel,
+    messages.settingsFeaturesHeader,
+    "GameFontNormal",
+    "TOPLEFT",
+    controls.launchCount,
+    "BOTTOMLEFT",
+    0,
+    -12
+  );
+
+  controls.actionLayoutCheckbox = createCheckbox(
+    optionsPanel,
+    "ChrisWowAddonEnableCustomActionLayout",
+    messages.enableCustomActionLayout,
+    "TOPLEFT",
+    optionsPanel,
+    "TOPLEFT",
+    20,
+    -128,
+    checked => {
+      setEnableCustomActionLayout(checked);
+      handlers?.onActionLayoutChanged();
+    }
+  );
+
+  controls.spellTextEffectCheckbox = createCheckbox(
+    optionsPanel,
+    "ChrisWowAddonEnableSpellTextEffect",
+    messages.enableSpellTextEffect,
+    "TOPLEFT",
+    controls.actionLayoutCheckbox,
+    "BOTTOMLEFT",
+    0,
+    -4,
+    checked => {
+      setEnableSpellTextEffect(checked);
+      handlers?.onSpellTextEffectChanged();
+    }
+  );
+
+  controls.demonSlayerUnitFramesCheckbox = createCheckbox(
+    optionsPanel,
+    "ChrisWowAddonEnableDemonSlayerUnitFrames",
+    messages.enableDemonSlayerUnitFrames,
+    "TOPLEFT",
+    controls.spellTextEffectCheckbox,
+    "BOTTOMLEFT",
+    0,
+    -4,
+    checked => {
+      setEnableDemonSlayerUnitFrames(checked);
+      handlers?.onDemonSlayerUnitFramesChanged();
+    }
+  );
+
+  controls.demonSlayerSystemButtonsCheckbox = createCheckbox(
+    optionsPanel,
+    "ChrisWowAddonEnableDemonSlayerSystemButtons",
+    messages.enableDemonSlayerSystemButtons,
+    "TOPLEFT",
+    controls.demonSlayerUnitFramesCheckbox,
+    "BOTTOMLEFT",
+    0,
+    -4,
+    checked => {
+      setEnableDemonSlayerSystemButtons(checked);
+      handlers?.onDemonSlayerSystemButtonsChanged();
+    }
+  );
+
   controls.minimapCheckbox = createCheckbox(
     optionsPanel,
     "ChrisWowAddonShowMinimapButton",
     messages.showMinimapButton,
     "TOPLEFT",
-    optionsPanel,
-    "TOPLEFT",
-    20,
-    -104,
+    controls.demonSlayerSystemButtonsCheckbox,
+    "BOTTOMLEFT",
+    0,
+    -12,
     checked => {
       setShowMinimapButton(checked);
       handlers?.onMinimapVisibilityChanged();
@@ -226,28 +322,13 @@ export function registerSettingsPanel(settingsPanelHandlers: SettingsPanelHandle
     }
   );
 
-  controls.actionLayoutCheckbox = createCheckbox(
-    optionsPanel,
-    "ChrisWowAddonEnableCustomActionLayout",
-    messages.enableCustomActionLayout,
-    "TOPLEFT",
-    controls.loginCheckbox,
-    "BOTTOMLEFT",
-    0,
-    -4,
-    checked => {
-      setEnableCustomActionLayout(checked);
-      handlers?.onActionLayoutChanged();
-    }
-  );
-
   createButton(
     optionsPanel,
     "ChrisWowAddonResetLaunchCount",
     messages.resetLaunchCount,
     150,
     "TOPLEFT",
-    controls.actionLayoutCheckbox,
+    controls.loginCheckbox,
     "BOTTOMLEFT",
     0,
     -18,
@@ -264,7 +345,7 @@ export function registerSettingsPanel(settingsPanelHandlers: SettingsPanelHandle
     messages.printDebugInfo,
     150,
     "TOPLEFT",
-    controls.actionLayoutCheckbox,
+    controls.loginCheckbox,
     "BOTTOMLEFT",
     160,
     -18,
@@ -275,6 +356,18 @@ export function registerSettingsPanel(settingsPanelHandlers: SettingsPanelHandle
 
   if (getSettings().enableCustomActionLayout) {
     syncActionLayout();
+  }
+
+  if (getSettings().enableSpellTextEffect) {
+    syncSpellTextEffect();
+  }
+
+  if (getSettings().enableDemonSlayerUnitFrames) {
+    syncDemonSlayerUnitFrames();
+  }
+
+  if (getSettings().enableDemonSlayerSystemButtons) {
+    syncDemonSlayerSystemButtons();
   }
 
   if (

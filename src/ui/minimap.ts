@@ -1,7 +1,7 @@
-import { LOGO_TEXTURE_PATH } from "./config";
-import { printDebugInfo } from "./commands";
-import { getSettings, setMinimapButtonAngle } from "./db";
-import { getMessages } from "./localization";
+import { printDebugInfo } from "../commands";
+import { LOGO_TEXTURE_PATH } from "../core/config";
+import { getSettings, setMinimapButtonAngle } from "../core/db";
+import { getMessages } from "../core/localization";
 
 let minimapButton: WowButton | undefined;
 let isDragging = false;

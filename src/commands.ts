@@ -1,7 +1,22 @@
-import { printActionLayoutStatus, syncActionLayout } from "./action-layout";
-import { SLASH_ALIASES, SLASH_COMMAND } from "./config";
-import { getLaunchCount, resetLaunchCount } from "./db";
-import { getMessages } from "./localization";
+import { getLaunchCount, getSettings, resetLaunchCount } from "./core/db";
+import { getMessages } from "./core/localization";
+import { SLASH_ALIASES, SLASH_COMMAND } from "./core/config";
+import { printActionLayoutStatus, syncActionLayout } from "./features/action-layout";
+import {
+  previewSpellTextEffect,
+  printSpellTextEffectStatus
+} from "./features/spell-text-effect";
+import {
+  printDemonSlayerSystemButtonStatus,
+  syncDemonSlayerSystemButtons
+} from "./features/system-buttons";
+import {
+  flushUnitFrameDebugSummary,
+  isUnitFrameDebugEnabled,
+  printDemonSlayerUnitFrameStatus,
+  setUnitFrameDebugEnabled,
+  syncDemonSlayerUnitFrames
+} from "./features/unit-frames";
 import { addonPrint, getRuntimeInfo, RuntimeInfo } from "./platform/wow";
 
 let openSettingsPanel: (() => void) | undefined;
@@ -34,6 +49,7 @@ export function printDebugInfo(): void {
 function handleSlashCommand(message?: string): void {
   const messages = getMessages();
   const command = message || "";
+  const settings = getSettings();
 
   if (command === "stats") {
     addonPrint(messages.stats(getLaunchCount()));
@@ -52,8 +68,77 @@ function handleSlashCommand(message?: string): void {
   }
 
   if (command === "layout") {
+    if (!settings.enableCustomActionLayout) {
+      addonPrint(messages.featureDisabled(messages.enableCustomActionLayout));
+      return;
+    }
+
     syncActionLayout(true);
     printActionLayoutStatus();
+    return;
+  }
+
+  if (command === "effect test") {
+    if (!settings.enableSpellTextEffect) {
+      addonPrint(messages.featureDisabled(messages.enableSpellTextEffect));
+      return;
+    }
+
+    previewSpellTextEffect();
+    addonPrint("Spell text effect preview shown.");
+    return;
+  }
+
+  if (command === "effect" || command === "effect status") {
+    printSpellTextEffectStatus();
+    return;
+  }
+
+  if (command === "frames debug off") {
+    setUnitFrameDebugEnabled(false);
+    return;
+  }
+
+  if (command === "frames debug" || command === "frames debug on") {
+    if (!settings.enableDemonSlayerUnitFrames) {
+      addonPrint(messages.featureDisabled(messages.enableDemonSlayerUnitFrames));
+      return;
+    }
+
+    setUnitFrameDebugEnabled(true);
+    addonPrint("Traces flush every 2s. Use '/cwa frames debug flush' for immediate summary.");
+    return;
+  }
+
+  if (command === "frames debug flush") {
+    flushUnitFrameDebugSummary(true);
+    return;
+  }
+
+  if (command === "frames" || command === "frames status") {
+    if (!settings.enableDemonSlayerUnitFrames) {
+      addonPrint(messages.featureDisabled(messages.enableDemonSlayerUnitFrames));
+      return;
+    }
+
+    syncDemonSlayerUnitFrames();
+    printDemonSlayerUnitFrameStatus();
+
+    if (isUnitFrameDebugEnabled()) {
+      addonPrint("Unit frame debug logging is on (/cwa frames debug off to disable).");
+    }
+
+    return;
+  }
+
+  if (command === "buttons" || command === "buttons status") {
+    if (!settings.enableDemonSlayerSystemButtons) {
+      addonPrint(messages.featureDisabled(messages.enableDemonSlayerSystemButtons));
+      return;
+    }
+
+    syncDemonSlayerSystemButtons();
+    printDemonSlayerSystemButtonStatus();
     return;
   }
 

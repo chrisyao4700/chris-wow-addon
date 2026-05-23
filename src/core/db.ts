@@ -3,6 +3,9 @@ export type ChrisWowAddonSettings = {
   showLoginMessage?: boolean;
   minimapButtonAngle?: number;
   enableCustomActionLayout?: boolean;
+  enableSpellTextEffect?: boolean;
+  enableDemonSlayerUnitFrames?: boolean;
+  enableDemonSlayerSystemButtons?: boolean;
 };
 
 export type ChrisWowAddonState = {
@@ -31,8 +34,31 @@ export function getSettings(): Required<ChrisWowAddonSettings> {
     showMinimapButton: state.settings.showMinimapButton !== false,
     showLoginMessage: state.settings.showLoginMessage !== false,
     minimapButtonAngle: state.settings.minimapButtonAngle ?? 45,
-    enableCustomActionLayout: state.settings.enableCustomActionLayout !== false
+    enableCustomActionLayout: state.settings.enableCustomActionLayout !== false,
+    enableSpellTextEffect: state.settings.enableSpellTextEffect !== false,
+    enableDemonSlayerUnitFrames: state.settings.enableDemonSlayerUnitFrames !== false,
+    enableDemonSlayerSystemButtons: state.settings.enableDemonSlayerSystemButtons !== false
   };
+}
+
+export function setEnableDemonSlayerSystemButtons(enableDemonSlayerSystemButtons: boolean): void {
+  const state = ensureSavedVariables();
+
+  if (state.settings === undefined) {
+    state.settings = {};
+  }
+
+  state.settings.enableDemonSlayerSystemButtons = enableDemonSlayerSystemButtons;
+}
+
+export function setEnableDemonSlayerUnitFrames(enableDemonSlayerUnitFrames: boolean): void {
+  const state = ensureSavedVariables();
+
+  if (state.settings === undefined) {
+    state.settings = {};
+  }
+
+  state.settings.enableDemonSlayerUnitFrames = enableDemonSlayerUnitFrames;
 }
 
 export function setShowMinimapButton(showMinimapButton: boolean): void {
@@ -73,6 +99,16 @@ export function setEnableCustomActionLayout(enableCustomActionLayout: boolean): 
   }
 
   state.settings.enableCustomActionLayout = enableCustomActionLayout;
+}
+
+export function setEnableSpellTextEffect(enableSpellTextEffect: boolean): void {
+  const state = ensureSavedVariables();
+
+  if (state.settings === undefined) {
+    state.settings = {};
+  }
+
+  state.settings.enableSpellTextEffect = enableSpellTextEffect;
 }
 
 export function getLaunchCount(): number {
