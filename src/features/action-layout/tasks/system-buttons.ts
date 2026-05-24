@@ -3,9 +3,10 @@ import {
   BAG_ROW_Y,
   BAG_BUTTON_NAMES,
   MICRO_BUTTON_OVERLAY_PAIRS,
-  MICRO_ROW_Y,
+  MICRO_BUTTON_ROWS,
   SYSTEM_BUTTON_GAP,
-  SYSTEM_BUTTON_SIZE
+  SYSTEM_BUTTON_SIZE,
+  SYSTEM_ROW_HEIGHT
 } from "../constants";
 import { canLayoutFrame, captureFrame, getFrame, hookLayoutFrame, restoreFrames } from "../frame-store";
 import { isCombatLocked } from "../layout-state";
@@ -117,15 +118,19 @@ function applyBagButtons(onReshow: () => void): number {
   return placedColumn;
 }
 
-function applyMicroButtons(onReshow: () => void): number {
+function getMicroRowYOffset(rowIndex: number): number {
+  return SYSTEM_ROW_HEIGHT * (1 + rowIndex);
+}
+
+function applyMicroButtons(onReshow: () => void): number[] {
   const systemButtonFrame = getSystemButtonFrame();
 
   if (systemButtonFrame === undefined) {
-    return 0;
+    return [0, 0];
   }
 
   const names = getMicroButtonNames();
-  let placedColumn = 0;
+  const buttonsToPlace: string[] = [];
 
   for (let index = names.length - 1; index >= 0; index--) {
     const name = names[index];
@@ -140,21 +145,38 @@ function applyMicroButtons(onReshow: () => void): number {
       continue;
     }
 
-    layoutSystemRowButton(button, name, placedColumn, MICRO_ROW_Y, onReshow);
-    placedColumn++;
+    buttonsToPlace.push(name);
+  }
+
+  const rowCounts = [0, 0];
+  const buttonsPerRow = Math.ceil(buttonsToPlace.length / MICRO_BUTTON_ROWS);
+
+  for (let index = 0; index < buttonsToPlace.length; index++) {
+    const name = buttonsToPlace[index];
+    const button = getFrame(name);
+
+    if (button === undefined) {
+      continue;
+    }
+
+    const rowIndex = Math.floor(index / buttonsPerRow);
+    const placedColumn = index % buttonsPerRow;
+
+    layoutSystemRowButton(button, name, placedColumn, getMicroRowYOffset(rowIndex), onReshow);
+    rowCounts[rowIndex]++;
   }
 
   applyMicroButtonOverlays(onReshow);
 
-  return placedColumn;
+  return rowCounts;
 }
 
 export function applySystemButtonLayout(onReshow: () => void): void {
   const bagButtonCount = applyBagButtons(onReshow);
-  const microButtonCount = applyMicroButtons(onReshow);
+  const microRowCounts = applyMicroButtons(onReshow);
 
   updateSystemFrameWidth(
-    [getSystemRowWidth(bagButtonCount), getSystemRowWidth(microButtonCount)],
+    [getSystemRowWidth(bagButtonCount), ...microRowCounts.map((count) => getSystemRowWidth(count))],
     SYSTEM_BUTTON_SIZE
   );
 }

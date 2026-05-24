@@ -3,7 +3,6 @@ import { setLayoutApplying } from "./layout-state";
 import { onLayoutFrameReshow } from "./scheduler";
 import { applyActionButtonLayout, restoreActionButtonLayout } from "./tasks/action-buttons";
 import { applyExpBarLayout, restoreExpBarLayout } from "./tasks/exp-bar";
-import { applyLootFrameLayout, restoreLootFrameLayout } from "./tasks/loot-frame";
 import { applyShellLayout, restoreShellLayout } from "./tasks/shell";
 import { beginStanceBarLayoutPass, applyStanceBarLayout, restoreStanceBarLayout } from "./tasks/stance-bar";
 import { applyStatusBarLayout, restoreStatusBarLayout } from "./tasks/status-bars";
@@ -22,7 +21,6 @@ export function applyCustomLayout(): void {
   applyStatusBarLayout(onReshow);
   applyShellLayout(onReshow);
   applyExpBarLayout(onReshow);
-  applyLootFrameLayout();
 
   setLayoutApplying(false);
 }
@@ -34,5 +32,4 @@ export function restoreBlizzardLayout(): void {
   restoreStatusBarLayout();
   restoreShellLayout();
   restoreExpBarLayout();
-  restoreLootFrameLayout();
 }

@@ -19,7 +19,7 @@ The runtime feature lives in `src/features/system-buttons/`. It swaps button tex
 | File format | `.tga`, 32-bit RGBA, straight alpha |
 | Install path | `assets/system-buttons/{assetId}.tga` |
 | Optional states | `{assetId}-pushed.tga`, `{assetId}-disabled.tga`, `{assetId}-highlight.tga` |
-| In-game path | `Interface\AddOns\ChrisWowAddon\assets\system-buttons\{assetId}` |
+| In-game path | `Interface\AddOns\SlayerUI\assets\system-buttons\{assetId}` |
 
 If optional state files are omitted, the addon reuses the normal texture for that state.
 
@@ -53,7 +53,7 @@ These stems must match `src/features/system-buttons/button-registry.ts`.
 
 ## Visual Language
 
-Reuse the unit frame tokens from [../unit-target-frames/README.md](../unit-target-frames/README.md):
+Shared Taisho-era demon-slayer UI tokens:
 
 - Ink black `#100d0b` for shadows and silhouettes
 - Lacquer red `#6f161b` for danger/menu emphasis
@@ -67,8 +67,8 @@ Reuse the unit frame tokens from [../unit-target-frames/README.md](../unit-targe
 
 1. Drop finished `.tga` files into `assets/system-buttons/`.
 2. `/reload` or restart the client.
-3. Enable **Demon Slayer menu bar buttons** in `/cwa options`.
-4. Run `/cwa buttons` to print how many frames and assets loaded.
+3. Enable **Demon Slayer menu bar buttons** in `/slayer options`.
+4. Run `/slayer buttons` to print how many frames and assets loaded.
 
 ## Files
 

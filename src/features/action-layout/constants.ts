@@ -21,13 +21,13 @@ export const EXP_BAR_LAYOUT_HOOK_TARGETS = [
   "MainMenuExpBar_SetWidth"
 ] as const;
 
-export const SYSTEM_BUTTON_SIZE = 28;
-export const SYSTEM_BUTTON_GAP = 0;
-export const SYSTEM_ROW_HEIGHT = SYSTEM_BUTTON_SIZE + 8;
+export const SYSTEM_BUTTON_SIZE = 36;
+export const SYSTEM_BUTTON_GAP = -4;
+export const SYSTEM_ROW_HEIGHT = SYSTEM_BUTTON_SIZE + 4;
 export const BAG_ROW_Y = 0;
-export const MICRO_ROW_Y = SYSTEM_ROW_HEIGHT;
+export const MICRO_BUTTON_ROWS = 2;
 export const SYSTEM_FRAME_WIDTH = 620;
-export const SYSTEM_FRAME_HEIGHT = SYSTEM_ROW_HEIGHT * 2;
+export const SYSTEM_FRAME_HEIGHT = SYSTEM_ROW_HEIGHT * (1 + MICRO_BUTTON_ROWS);
 export const SYSTEM_FRAME_MARGIN = 16;
 
 export const RELAYOUT_DELAY_SECONDS = 0.05;
@@ -135,10 +135,3 @@ export const BLIZZARD_LAYOUT_HOOK_TARGETS = [
   "ActionBar_Update",
   "UIParent_ManageFramePositions"
 ] as const;
-
-export const LOOT_FRAME_NAMES = ["LootFrame"] as const;
-export const LOOT_FRAME_DEFAULT_WIDTH = 256;
-export const LOOT_FRAME_DEFAULT_HEIGHT = 256;
-// Cursor-relative TOPLEFT anchor when the loot window opens.
-export const LOOT_FRAME_CURSOR_OFFSET_X = -40;
-export const LOOT_FRAME_CURSOR_OFFSET_Y = 95;

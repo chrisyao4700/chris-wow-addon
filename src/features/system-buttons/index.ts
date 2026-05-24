@@ -25,6 +25,7 @@ const RESYNC_DELAYS_SECONDS = [0, 0.15, 0.5, 1.5];
 let eventFrame: WowFrame | undefined;
 let hooksInstalled = false;
 let pendingResync = false;
+let deferredResyncScheduled = false;
 let layoutSyncRegistered = false;
 let appliedFrameNames: string[] = [];
 
@@ -36,12 +37,20 @@ function getFrame(name: string): WowFrame | undefined {
   return _G[name] as WowFrame | undefined;
 }
 
+function isCombatLocked(): boolean {
+  return InCombatLockdown !== undefined && InCombatLockdown();
+}
+
+function areSystemButtonFramesReady(): boolean {
+  return getDiscoveredMicroButtonFrameNames().some(name => getFrame(name) !== undefined);
+}
+
 function canSkinButtons(): boolean {
-  if (InCombatLockdown !== undefined && InCombatLockdown()) {
+  if (isCombatLocked()) {
     return false;
   }
 
-  return getDiscoveredMicroButtonFrameNames().some(name => getFrame(name) !== undefined);
+  return areSystemButtonFramesReady();
 }
 
 function restoreExcludedBagButtonSkins(): void {
@@ -95,6 +104,13 @@ function scheduleSystemButtonResync(): void {
 }
 
 function scheduleDeferredSystemButtonResync(): void {
+  if (deferredResyncScheduled || isCombatLocked()) {
+    return;
+  }
+
+  deferredResyncScheduled = true;
+  const lastDelaySeconds = RESYNC_DELAYS_SECONDS[RESYNC_DELAYS_SECONDS.length - 1];
+
   for (const delaySeconds of RESYNC_DELAYS_SECONDS) {
     C_Timer.After(delaySeconds, () => {
       if (!isFeatureEnabled()) {
@@ -104,6 +120,10 @@ function scheduleDeferredSystemButtonResync(): void {
       syncDemonSlayerSystemButtons();
     });
   }
+
+  C_Timer.After(lastDelaySeconds, () => {
+    deferredResyncScheduled = false;
+  });
 }
 
 function installCharacterMicroButtonHooks(): void {
@@ -149,7 +169,7 @@ function installSystemButtonHooks(): void {
 
   if (typeof _G.UpdateMicroButtons === "function") {
     hooksecurefunc("UpdateMicroButtons", () => {
-      if (!isFeatureEnabled()) {
+      if (!isFeatureEnabled() || isCombatLocked()) {
         return;
       }
 
@@ -159,7 +179,7 @@ function installSystemButtonHooks(): void {
 
   if (typeof MoveMicroButtons === "function") {
     hooksecurefunc("MoveMicroButtons", () => {
-      if (!isFeatureEnabled()) {
+      if (!isFeatureEnabled() || isCombatLocked()) {
         return;
       }
 
@@ -193,7 +213,12 @@ export function syncDemonSlayerSystemButtons(): void {
 
   restoreExcludedBagButtonSkins();
 
-  if (!canSkinButtons()) {
+  if (isCombatLocked()) {
+    // Skinning is blocked in combat; PLAYER_REGEN_ENABLED resyncs when combat ends.
+    return;
+  }
+
+  if (!areSystemButtonFramesReady()) {
     scheduleDeferredSystemButtonResync();
     return;
   }

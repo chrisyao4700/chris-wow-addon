@@ -8,8 +8,18 @@ import {
 } from "./class-bindings";
 import { rogueSpellTextEffectMapping } from "./mappings/classes/rogue";
 import type { PlayerClassFileName } from "./mappings/types";
+import {
+  canShowSpellAnimationEffect,
+  getSpellAnimationAssetStatusLines,
+  getSpellAnimationTimingSummary,
+  preloadSpellAnimationPool,
+  setSpellAnimationAnchorFrame,
+  syncSpellAnimationEffect,
+  tryShowSpellAnimationEffect
+} from "../spell-animation-effect";
+import { getClientCalloutFontSummary, clearClientCalloutFontCache } from "./client-callout-font";
 import { SpellTextEffectBinding, SpellTextEffectRegistry } from "./registry";
-import { getTextEffectTimingSummary, showTextEffect } from "./text-effect";
+import { ensureSpellTextAnchorFrame, getTextEffectTimingSummary, hideSpellTextOverlay, showTextEffect } from "./text-effect";
 
 const CAST_TRIGGER_COOLDOWN_SECONDS = 1;
 const SPELLBOOK_REBUILD_DELAY_SECONDS = 0.2;
@@ -83,6 +93,15 @@ export function showSpellTextEffect(spellId: number | undefined, spellName: stri
     return false;
   }
 
+  setSpellAnimationAnchorFrame(ensureSpellTextAnchorFrame());
+
+  const playResult = tryShowSpellAnimationEffect(displayText);
+
+  if (playResult === "played" || playResult === "skipped_duplicate") {
+    hideSpellTextOverlay();
+    return true;
+  }
+
   showTextEffect(displayText);
   return true;
 }
@@ -118,6 +137,15 @@ export function reloadPlayerClassSpellTextBindings(): PlayerClassFileName | unde
 }
 
 export function previewSpellTextEffect(displayText: string = PREVIEW_DISPLAY_TEXT): void {
+  setSpellAnimationAnchorFrame(ensureSpellTextAnchorFrame());
+
+  const playResult = tryShowSpellAnimationEffect(displayText);
+
+  if (playResult === "played" || playResult === "skipped_duplicate") {
+    hideSpellTextOverlay();
+    return;
+  }
+
   showTextEffect(displayText);
 }
 
@@ -132,12 +160,26 @@ export function printSpellTextEffectStatus(): void {
   addonPrint(`Loaded class: ${loadedClass ?? "unknown (not logged in yet?)"}`);
   addonPrint(`Combat log API: ${hasCombatLogApi ? "yes" : "no"}`);
   addonPrint(`UNIT_SPELLCAST API: ${hasUnitSpellcastApi ? "yes" : "no"}`);
-  addonPrint(`Timing: ${getTextEffectTimingSummary()}`);
+  addonPrint(`Timing: ${getTextEffectTimingSummary()} (text fallback)`);
+  addonPrint(`Text fallback font: ${getClientCalloutFontSummary()} (client, text-only path)`);
+  addonPrint(`Animation: ${getSpellAnimationTimingSummary()}`);
+  addonPrint(`Animation ready for preview text: ${canShowSpellAnimationEffect(PREVIEW_DISPLAY_TEXT) ? "yes" : "no"}`);
+  addonPrint(
+    `Animation path for preview: ${
+      canShowSpellAnimationEffect(PREVIEW_DISPLAY_TEXT)
+        ? "layered TGA + VFX"
+        : "text-only fallback (missing VFX/text assets)"
+    }`
+  );
+
+  for (const line of getSpellAnimationAssetStatusLines(PREVIEW_DISPLAY_TEXT)) {
+    addonPrint(`Animation asset ${line}`);
+  }
   addonPrint(`Bindings: ${bindings.length}`);
   addonPrint(`Tracked spell IDs: ${trackedIds.length > 0 ? trackedIds.join(", ") : "none (check skill names)"}`);
   addonPrint(`Watch names: ${watchNames}`);
   addonPrint(`Last player spell: ${lastPlayerSpellLog}`);
-  addonPrint("Test overlay: /cwa effect test");
+  addonPrint("Test overlay: /slayer effect test");
 }
 
 function handleCombatLogEvent(): void {
@@ -221,6 +263,9 @@ export function syncSpellTextEffect(): void {
     return;
   }
 
+  clearClientCalloutFontCache();
+  setSpellAnimationAnchorFrame(ensureSpellTextAnchorFrame());
+  syncSpellAnimationEffect();
   reloadPlayerClassSpellTextBindings();
 }
 

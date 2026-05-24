@@ -1,29 +1,38 @@
-export type ChrisWowAddonSettings = {
+export type SlayerUISettings = {
   showMinimapButton?: boolean;
   showLoginMessage?: boolean;
   minimapButtonAngle?: number;
   enableCustomActionLayout?: boolean;
   enableSpellTextEffect?: boolean;
-  enableDemonSlayerUnitFrames?: boolean;
   enableDemonSlayerSystemButtons?: boolean;
+  spellEffectUserScale?: number;
+  spellEffectOffsetX?: number;
+  spellEffectOffsetY?: number;
 };
 
-export type ChrisWowAddonState = {
+export type SlayerUIState = {
   launches?: number;
-  settings?: ChrisWowAddonSettings;
+  settings?: SlayerUISettings;
 };
 
-declare let ChrisWowAddonDB: ChrisWowAddonState | undefined;
+declare let SlayerUIDB: SlayerUIState | undefined;
 
-export function ensureSavedVariables(): ChrisWowAddonState {
-  if (ChrisWowAddonDB === undefined) {
-    ChrisWowAddonDB = {};
+/** Legacy saved variables from Chris Wow Addon — migrated on first load. */
+declare let ChrisWowAddonDB: SlayerUIState | undefined;
+
+export function ensureSavedVariables(): SlayerUIState {
+  if (SlayerUIDB === undefined) {
+    if (ChrisWowAddonDB !== undefined) {
+      SlayerUIDB = ChrisWowAddonDB;
+    } else {
+      SlayerUIDB = {};
+    }
   }
 
-  return ChrisWowAddonDB;
+  return SlayerUIDB;
 }
 
-export function getSettings(): Required<ChrisWowAddonSettings> {
+export function getSettings(): Required<SlayerUISettings> {
   const state = ensureSavedVariables();
 
   if (state.settings === undefined) {
@@ -33,12 +42,56 @@ export function getSettings(): Required<ChrisWowAddonSettings> {
   return {
     showMinimapButton: state.settings.showMinimapButton !== false,
     showLoginMessage: state.settings.showLoginMessage !== false,
-    minimapButtonAngle: state.settings.minimapButtonAngle ?? 45,
+    minimapButtonAngle: state.settings.minimapButtonAngle ?? 225,
     enableCustomActionLayout: state.settings.enableCustomActionLayout !== false,
     enableSpellTextEffect: state.settings.enableSpellTextEffect !== false,
-    enableDemonSlayerUnitFrames: state.settings.enableDemonSlayerUnitFrames !== false,
-    enableDemonSlayerSystemButtons: state.settings.enableDemonSlayerSystemButtons !== false
+    enableDemonSlayerSystemButtons: state.settings.enableDemonSlayerSystemButtons !== false,
+    spellEffectUserScale: state.settings.spellEffectUserScale ?? 1,
+    spellEffectOffsetX: state.settings.spellEffectOffsetX ?? 0,
+    spellEffectOffsetY: state.settings.spellEffectOffsetY ?? 0
   };
+}
+
+export function setSpellEffectUserScale(spellEffectUserScale: number): void {
+  const state = ensureSavedVariables();
+
+  if (state.settings === undefined) {
+    state.settings = {};
+  }
+
+  state.settings.spellEffectUserScale = spellEffectUserScale;
+}
+
+export function setSpellEffectOffsetX(spellEffectOffsetX: number): void {
+  const state = ensureSavedVariables();
+
+  if (state.settings === undefined) {
+    state.settings = {};
+  }
+
+  state.settings.spellEffectOffsetX = spellEffectOffsetX;
+}
+
+export function setSpellEffectOffsetY(spellEffectOffsetY: number): void {
+  const state = ensureSavedVariables();
+
+  if (state.settings === undefined) {
+    state.settings = {};
+  }
+
+  state.settings.spellEffectOffsetY = spellEffectOffsetY;
+}
+
+export function resetSpellEffectLayout(): void {
+  const state = ensureSavedVariables();
+
+  if (state.settings === undefined) {
+    state.settings = {};
+  }
+
+  state.settings.spellEffectUserScale = 1;
+  state.settings.spellEffectOffsetX = 0;
+  state.settings.spellEffectOffsetY = 0;
 }
 
 export function setEnableDemonSlayerSystemButtons(enableDemonSlayerSystemButtons: boolean): void {
@@ -49,16 +102,6 @@ export function setEnableDemonSlayerSystemButtons(enableDemonSlayerSystemButtons
   }
 
   state.settings.enableDemonSlayerSystemButtons = enableDemonSlayerSystemButtons;
-}
-
-export function setEnableDemonSlayerUnitFrames(enableDemonSlayerUnitFrames: boolean): void {
-  const state = ensureSavedVariables();
-
-  if (state.settings === undefined) {
-    state.settings = {};
-  }
-
-  state.settings.enableDemonSlayerUnitFrames = enableDemonSlayerUnitFrames;
 }
 
 export function setShowMinimapButton(showMinimapButton: boolean): void {

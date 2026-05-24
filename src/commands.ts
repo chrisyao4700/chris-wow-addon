@@ -7,16 +7,13 @@ import {
   printSpellTextEffectStatus
 } from "./features/spell-text-effect";
 import {
+  isSpellEffectLayoutEditorActive,
+  toggleSpellEffectLayoutEditor
+} from "./features/spell-animation-effect";
+import {
   printDemonSlayerSystemButtonStatus,
   syncDemonSlayerSystemButtons
 } from "./features/system-buttons";
-import {
-  flushUnitFrameDebugSummary,
-  isUnitFrameDebugEnabled,
-  printDemonSlayerUnitFrameStatus,
-  setUnitFrameDebugEnabled,
-  syncDemonSlayerUnitFrames
-} from "./features/unit-frames";
 import { addonPrint, getRuntimeInfo, RuntimeInfo } from "./platform/wow";
 
 let openSettingsPanel: (() => void) | undefined;
@@ -89,45 +86,25 @@ function handleSlashCommand(message?: string): void {
     return;
   }
 
+  if (command === "effect layout") {
+    if (!settings.enableSpellTextEffect) {
+      addonPrint(messages.featureDisabled(messages.enableSpellTextEffect));
+      return;
+    }
+
+    if (isSpellEffectLayoutEditorActive()) {
+      toggleSpellEffectLayoutEditor();
+      addonPrint(messages.spellEffectLayoutEditorClosed);
+      return;
+    }
+
+    toggleSpellEffectLayoutEditor();
+    addonPrint(messages.spellEffectLayoutEditorOpened);
+    return;
+  }
+
   if (command === "effect" || command === "effect status") {
     printSpellTextEffectStatus();
-    return;
-  }
-
-  if (command === "frames debug off") {
-    setUnitFrameDebugEnabled(false);
-    return;
-  }
-
-  if (command === "frames debug" || command === "frames debug on") {
-    if (!settings.enableDemonSlayerUnitFrames) {
-      addonPrint(messages.featureDisabled(messages.enableDemonSlayerUnitFrames));
-      return;
-    }
-
-    setUnitFrameDebugEnabled(true);
-    addonPrint("Traces flush every 2s. Use '/cwa frames debug flush' for immediate summary.");
-    return;
-  }
-
-  if (command === "frames debug flush") {
-    flushUnitFrameDebugSummary(true);
-    return;
-  }
-
-  if (command === "frames" || command === "frames status") {
-    if (!settings.enableDemonSlayerUnitFrames) {
-      addonPrint(messages.featureDisabled(messages.enableDemonSlayerUnitFrames));
-      return;
-    }
-
-    syncDemonSlayerUnitFrames();
-    printDemonSlayerUnitFrameStatus();
-
-    if (isUnitFrameDebugEnabled()) {
-      addonPrint("Unit frame debug logging is on (/cwa frames debug off to disable).");
-    }
-
     return;
   }
 
@@ -157,7 +134,7 @@ function handleSlashCommand(message?: string): void {
 
 export function registerSlashCommands(settingsPanelOpener?: () => void): void {
   openSettingsPanel = settingsPanelOpener;
-  _G.SLASH_CHRISWOWADDON1 = SLASH_ALIASES.short;
-  _G.SLASH_CHRISWOWADDON2 = SLASH_ALIASES.full;
+  _G.SLASH_SLAYERUI1 = SLASH_ALIASES.short;
+  _G.SLASH_SLAYERUI2 = SLASH_ALIASES.full;
   SlashCmdList[SLASH_COMMAND] = handleSlashCommand;
 }

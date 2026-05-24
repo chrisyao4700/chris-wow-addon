@@ -1,5 +1,5 @@
 import { printDebugInfo } from "../commands";
-import { LOGO_TEXTURE_PATH } from "../core/config";
+import { ADDON_NAME, LOGO_TEXTURE_PATH } from "../core/config";
 import { getSettings, setMinimapButtonAngle } from "../core/db";
 import { getMessages } from "../core/localization";
 
@@ -7,8 +7,8 @@ let minimapButton: WowButton | undefined;
 let isDragging = false;
 let suppressNextClick = false;
 
-const MINIMAP_BUTTON_SIZE = 42;
-const MINIMAP_ICON_SIZE = 36;
+const MINIMAP_BUTTON_SIZE = 36;
+const MINIMAP_ICON_SIZE = 31;
 const MINIMAP_EDGE_OVERLAP = 5;
 
 function normalizeAngle(angle: number): number {
@@ -72,7 +72,7 @@ export function registerMinimapButton(openSettings: () => void): void {
     return;
   }
 
-  const button = CreateFrame("Button", "ChrisWowAddonMinimapButton", Minimap);
+  const button = CreateFrame("Button", `${ADDON_NAME}MinimapButton`, Minimap);
   minimapButton = button;
 
   button.SetSize(MINIMAP_BUTTON_SIZE, MINIMAP_BUTTON_SIZE);

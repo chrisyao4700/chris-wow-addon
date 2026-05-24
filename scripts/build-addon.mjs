@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const addonName = "ChrisWowAddon";
+const addonName = "SlayerUI";
 const targetInterfaceVersion = "38001";
 const packageJson = JSON.parse(await readFile(join(root, "package.json"), "utf8"));
 const version = packageJson.version;
@@ -76,6 +76,12 @@ async function copyBuildArtifacts() {
 
   if (existsSync(systemButtonAssetsDir)) {
     await cp(systemButtonAssetsDir, join(distAssets, "system-buttons"), { recursive: true });
+  }
+
+  const spellEffectAssetsDir = join(paths.assets, "spell-effects");
+
+  if (existsSync(spellEffectAssetsDir)) {
+    await cp(spellEffectAssetsDir, join(distAssets, "spell-effects"), { recursive: true });
   }
 }
 
@@ -209,6 +215,7 @@ async function installAddon() {
   const addonDir = await resolveAddonsDir();
 
   await rm(join(addonDir, addonName), { recursive: true, force: true });
+  await rm(join(addonDir, "ChrisWowAddon"), { recursive: true, force: true });
   await cp(paths.distAddon, join(addonDir, addonName), { recursive: true });
   console.log(`Installed ${addonName} to ${addonDir}`);
 }

@@ -55,9 +55,19 @@ function ensureProbeTexture(): WowTexture {
   return probeTexture;
 }
 
+function getTexturePathString(texture: WowTexture): string | undefined {
+  const resolved = texture.GetTexture();
+
+  if (typeof resolved === "number") {
+    return resolved > 0 ? `${resolved}` : undefined;
+  }
+
+  return resolved === "" ? undefined : resolved;
+}
+
 function saveTextureState(texture: WowTexture): SavedTextureState {
   const state: SavedTextureState = {
-    path: texture.GetTexture(),
+    path: getTexturePathString(texture),
     wasShown: texture.IsShown()
   };
 
@@ -258,7 +268,7 @@ function applyRoleTexture(
   }
 
   if (saved[pathKey] === undefined) {
-    saved[pathKey] = texture.GetTexture();
+    saved[pathKey] = getTexturePathString(texture);
   }
 
   setter(button, path);

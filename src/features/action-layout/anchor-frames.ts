@@ -1,3 +1,4 @@
+import { ADDON_NAME } from "../../core/config";
 import {
   ACTION_BUTTON_SIZE,
   ACTION_GRID_BOTTOM,
@@ -36,7 +37,7 @@ export function isStanceAnchorFrame(frame: WowFrame): boolean {
     return true;
   }
 
-  return (_G["ChrisWowAddonStanceAnchorFrame"] as WowFrame | undefined) === frame;
+  return (_G[`${ADDON_NAME}StanceAnchorFrame`] as WowFrame | undefined) === frame;
 }
 
 export function ensureStanceAnchorFrame(): WowFrame | undefined {
@@ -47,7 +48,7 @@ export function ensureStanceAnchorFrame(): WowFrame | undefined {
   }
 
   if (stanceAnchorFrame === undefined) {
-    stanceAnchorFrame = CreateFrame("Frame", "ChrisWowAddonStanceAnchorFrame", UIParent);
+    stanceAnchorFrame = CreateFrame("Frame", `${ADDON_NAME}StanceAnchorFrame`, UIParent);
     stanceAnchorFrame.SetFrameStrata("MEDIUM");
   }
 
@@ -60,14 +61,14 @@ export function ensureStanceAnchorFrame(): WowFrame | undefined {
 
 export function ensureLayoutFrames(): void {
   if (actionGridFrame === undefined) {
-    actionGridFrame = CreateFrame("Frame", "ChrisWowAddonActionGridFrame", UIParent);
+    actionGridFrame = CreateFrame("Frame", `${ADDON_NAME}ActionGridFrame`, UIParent);
     actionGridFrame.SetSize(ACTION_GRID_WIDTH, ACTION_GRID_HEIGHT);
     actionGridFrame.SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", ACTION_GRID_MARGIN, ACTION_GRID_BOTTOM);
     actionGridFrame.SetFrameStrata("MEDIUM");
   }
 
   if (systemButtonFrame === undefined) {
-    systemButtonFrame = CreateFrame("Frame", "ChrisWowAddonSystemButtonFrame", UIParent);
+    systemButtonFrame = CreateFrame("Frame", `${ADDON_NAME}SystemButtonFrame`, UIParent);
     systemButtonFrame.SetSize(SYSTEM_FRAME_WIDTH, SYSTEM_FRAME_HEIGHT);
     systemButtonFrame.SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -SYSTEM_FRAME_MARGIN, SYSTEM_FRAME_MARGIN);
     systemButtonFrame.SetFrameStrata("MEDIUM");
@@ -76,7 +77,7 @@ export function ensureLayoutFrames(): void {
 
 export function ensureLayoutHiderFrame(): WowFrame {
   if (layoutHiderFrame === undefined) {
-    layoutHiderFrame = CreateFrame("Frame", "ChrisWowAddonLayoutHiderFrame", UIParent);
+    layoutHiderFrame = CreateFrame("Frame", `${ADDON_NAME}LayoutHiderFrame`, UIParent);
     layoutHiderFrame.Hide();
   }
 

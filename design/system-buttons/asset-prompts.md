@@ -48,8 +48,8 @@ For each asset ID:
 2. Convert to `.tga` (32-bit BGRA).
 3. Save as `assets/system-buttons/{assetId}.tga`.
 4. Optionally export `-pushed`, `-disabled`, `-highlight` variants.
-5. Run `npm run build` (or your usual addon build) so files copy into `dist/ChrisWowAddon/assets/system-buttons/`.
-6. In-game: `/cwa buttons` should show `Loaded assets: N/N` increasing as files appear.
+5. Run `npm run build` (or your usual addon build) so files copy into `dist/SlayerUI/assets/system-buttons/`.
+6. In-game: `/slayer buttons` should show `Loaded assets: N/N` increasing as files appear.
 
 ## Negative Prompts (include when your tool supports them)
 

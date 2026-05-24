@@ -1,28 +1,36 @@
 import { printDebugInfo } from "../commands";
-import { ADDON_TITLE } from "../core/config";
+import { ADDON_NAME, ADDON_TITLE } from "../core/config";
 import {
   getLaunchCount,
   getSettings,
   resetLaunchCount,
   setEnableCustomActionLayout,
   setEnableDemonSlayerSystemButtons,
-  setEnableDemonSlayerUnitFrames,
   setEnableSpellTextEffect,
   setShowLoginMessage,
   setShowMinimapButton
 } from "../core/db";
 import { getMessages } from "../core/localization";
 import { syncActionLayout } from "../features/action-layout";
+import {
+  enterSpellEffectLayoutEditor,
+  exitSpellEffectLayoutEditor,
+  isSpellEffectLayoutEditorActive,
+  MAX_SPELL_EFFECT_USER_SCALE,
+  MIN_SPELL_EFFECT_USER_SCALE,
+  resetSpellEffectLayoutSettings,
+  syncSpellEffectLayout,
+  updateSpellEffectUserScale
+} from "../features/spell-animation-effect";
 import { syncSpellTextEffect } from "../features/spell-text-effect";
 import { syncDemonSlayerSystemButtons } from "../features/system-buttons";
-import { syncDemonSlayerUnitFrames } from "../features/unit-frames";
 import { addonPrint } from "../platform/wow";
 
 type SettingsPanelHandlers = {
   onMinimapVisibilityChanged: () => void;
   onActionLayoutChanged: () => void;
   onSpellTextEffectChanged: () => void;
-  onDemonSlayerUnitFramesChanged: () => void;
+  onSpellEffectLayoutChanged: () => void;
   onDemonSlayerSystemButtonsChanged: () => void;
 };
 
@@ -31,7 +39,11 @@ type SettingsPanelControls = {
   featuresHeader?: WowFontString;
   actionLayoutCheckbox?: WowCheckButton;
   spellTextEffectCheckbox?: WowCheckButton;
-  demonSlayerUnitFramesCheckbox?: WowCheckButton;
+  spellEffectLayoutHeader?: WowFontString;
+  spellEffectScaleSlider?: WowSlider;
+  spellEffectScaleValue?: WowFontString;
+  spellEffectAdjustButton?: WowButton;
+  spellEffectResetButton?: WowButton;
   demonSlayerSystemButtonsCheckbox?: WowCheckButton;
   minimapCheckbox?: WowCheckButton;
   loginCheckbox?: WowCheckButton;
@@ -92,13 +104,90 @@ function createCheckbox(
   return checkbox;
 }
 
+function createSlider(
+  parent: WowFrame,
+  name: string,
+  labelText: string,
+  point: WowPoint,
+  relativeTo: WowFrame | WowFontString,
+  relativePoint: WowPoint,
+  x: number,
+  y: number,
+  min: number,
+  max: number,
+  step: number,
+  onValueChanged: (value: number) => void
+): { slider: WowSlider; valueLabel: WowFontString } {
+  const label = parent.CreateFontString(undefined, "ARTWORK", "GameFontNormal");
+  label.SetPoint(point, relativeTo, relativePoint, x, y);
+  label.SetText(labelText);
+
+  const slider = CreateFrame("Slider", name, parent, "OptionsSliderTemplate") as WowSlider;
+  slider.SetPoint("TOPLEFT", label, "BOTTOMLEFT", 0, -8);
+  slider.SetWidth(180);
+  slider.SetMinMaxValues(min, max);
+  slider.SetValueStep(step);
+  slider.SetObeyStepOnDrag?.(true);
+
+  const valueLabel = parent.CreateFontString(undefined, "ARTWORK", "GameFontHighlight");
+  valueLabel.SetPoint("LEFT", slider, "RIGHT", 12, 0);
+
+  slider.SetScript("OnValueChanged", (_self, value) => {
+    const nextValue = typeof value === "number" ? value : Number(value);
+    onValueChanged(nextValue);
+    refreshSettingsPanel();
+  });
+
+  return { slider, valueLabel };
+}
+
+function refreshSpellEffectLayoutControls(): void {
+  const messages = getMessages();
+  const settings = getSettings();
+  const enabled = settings.enableSpellTextEffect;
+
+  if (controls.spellEffectScaleSlider !== undefined) {
+    controls.spellEffectScaleSlider.SetValue(settings.spellEffectUserScale);
+
+    if (enabled) {
+      controls.spellEffectScaleSlider.Enable?.();
+    } else {
+      controls.spellEffectScaleSlider.Disable?.();
+    }
+  }
+
+  if (controls.spellEffectScaleValue !== undefined) {
+    controls.spellEffectScaleValue.SetText(messages.spellEffectLayoutScaleValue(settings.spellEffectUserScale));
+  }
+
+  if (controls.spellEffectAdjustButton !== undefined) {
+    controls.spellEffectAdjustButton.SetText(
+      isSpellEffectLayoutEditorActive() ? messages.spellEffectLayoutDone : messages.spellEffectLayoutAdjust
+    );
+
+    if (enabled) {
+      controls.spellEffectAdjustButton.Enable?.();
+    } else {
+      controls.spellEffectAdjustButton.Disable?.();
+    }
+  }
+
+  if (controls.spellEffectResetButton !== undefined) {
+    if (enabled) {
+      controls.spellEffectResetButton.Enable?.();
+    } else {
+      controls.spellEffectResetButton.Disable?.();
+    }
+  }
+}
+
 function createButton(
   parent: WowFrame,
   name: string,
   text: string,
   width: number,
   point: WowPoint,
-  relativeTo: WowFrame,
+  relativeTo: WowFrame | WowFontString,
   relativePoint: WowPoint,
   x: number,
   y: number,
@@ -128,10 +217,6 @@ export function refreshSettingsPanel(): void {
     controls.spellTextEffectCheckbox.SetChecked(settings.enableSpellTextEffect);
   }
 
-  if (controls.demonSlayerUnitFramesCheckbox !== undefined) {
-    controls.demonSlayerUnitFramesCheckbox.SetChecked(settings.enableDemonSlayerUnitFrames);
-  }
-
   if (controls.demonSlayerSystemButtonsCheckbox !== undefined) {
     controls.demonSlayerSystemButtonsCheckbox.SetChecked(settings.enableDemonSlayerSystemButtons);
   }
@@ -143,6 +228,8 @@ export function refreshSettingsPanel(): void {
   if (controls.loginCheckbox !== undefined) {
     controls.loginCheckbox.SetChecked(settings.showLoginMessage);
   }
+
+  refreshSpellEffectLayoutControls();
 }
 
 export function openSettingsPanel(): void {
@@ -184,7 +271,7 @@ export function registerSettingsPanel(settingsPanelHandlers: SettingsPanelHandle
   }
 
   const messages = getMessages();
-  const optionsPanel = CreateFrame("Frame", "ChrisWowAddonOptionsPanel", UIParent) as WowOptionsPanel;
+  const optionsPanel = CreateFrame("Frame", `${ADDON_NAME}OptionsPanel`, UIParent) as WowOptionsPanel;
   panel = optionsPanel;
   optionsPanel.name = ADDON_TITLE;
   optionsPanel.refresh = refreshSettingsPanel;
@@ -235,7 +322,7 @@ export function registerSettingsPanel(settingsPanelHandlers: SettingsPanelHandle
 
   controls.actionLayoutCheckbox = createCheckbox(
     optionsPanel,
-    "ChrisWowAddonEnableCustomActionLayout",
+    `${ADDON_NAME}EnableCustomActionLayout`,
     messages.enableCustomActionLayout,
     "TOPLEFT",
     optionsPanel,
@@ -250,7 +337,7 @@ export function registerSettingsPanel(settingsPanelHandlers: SettingsPanelHandle
 
   controls.spellTextEffectCheckbox = createCheckbox(
     optionsPanel,
-    "ChrisWowAddonEnableSpellTextEffect",
+    `${ADDON_NAME}EnableSpellTextEffect`,
     messages.enableSpellTextEffect,
     "TOPLEFT",
     controls.actionLayoutCheckbox,
@@ -259,34 +346,100 @@ export function registerSettingsPanel(settingsPanelHandlers: SettingsPanelHandle
     -4,
     checked => {
       setEnableSpellTextEffect(checked);
+
+      if (!checked) {
+        exitSpellEffectLayoutEditor();
+      }
+
       handlers?.onSpellTextEffectChanged();
     }
   );
 
-  controls.demonSlayerUnitFramesCheckbox = createCheckbox(
+  controls.spellEffectLayoutHeader = createLabel(
     optionsPanel,
-    "ChrisWowAddonEnableDemonSlayerUnitFrames",
-    messages.enableDemonSlayerUnitFrames,
+    messages.spellEffectLayoutHeader,
+    "GameFontNormal",
     "TOPLEFT",
     controls.spellTextEffectCheckbox,
     "BOTTOMLEFT",
     0,
-    -4,
-    checked => {
-      setEnableDemonSlayerUnitFrames(checked);
-      handlers?.onDemonSlayerUnitFramesChanged();
+    -12
+  );
+
+  const scaleControls = createSlider(
+    optionsPanel,
+    `${ADDON_NAME}SpellEffectScale`,
+    messages.spellEffectLayoutScale,
+    "TOPLEFT",
+    controls.spellEffectLayoutHeader,
+    "BOTTOMLEFT",
+    0,
+    -8,
+    MIN_SPELL_EFFECT_USER_SCALE,
+    MAX_SPELL_EFFECT_USER_SCALE,
+    0.05,
+    value => {
+      updateSpellEffectUserScale(value);
+      handlers?.onSpellEffectLayoutChanged();
+    }
+  );
+  controls.spellEffectScaleSlider = scaleControls.slider;
+  controls.spellEffectScaleValue = scaleControls.valueLabel;
+
+  controls.spellEffectAdjustButton = createButton(
+    optionsPanel,
+    `${ADDON_NAME}SpellEffectAdjust`,
+    messages.spellEffectLayoutAdjust,
+    120,
+    "TOPLEFT",
+    scaleControls.slider,
+    "BOTTOMLEFT",
+    0,
+    -18,
+    () => {
+      if (!getSettings().enableSpellTextEffect) {
+        return;
+      }
+
+      if (isSpellEffectLayoutEditorActive()) {
+        exitSpellEffectLayoutEditor();
+        addonPrint(messages.spellEffectLayoutEditorClosed);
+      } else {
+        enterSpellEffectLayoutEditor();
+        addonPrint(messages.spellEffectLayoutEditorOpened);
+      }
+
+      refreshSettingsPanel();
+    }
+  );
+
+  controls.spellEffectResetButton = createButton(
+    optionsPanel,
+    `${ADDON_NAME}SpellEffectResetLayout`,
+    messages.spellEffectLayoutReset,
+    120,
+    "TOPLEFT",
+    controls.spellEffectAdjustButton,
+    "BOTTOMLEFT",
+    0,
+    -8,
+    () => {
+      resetSpellEffectLayoutSettings();
+      handlers?.onSpellEffectLayoutChanged();
+      addonPrint(messages.spellEffectLayoutResetConfirm);
+      refreshSettingsPanel();
     }
   );
 
   controls.demonSlayerSystemButtonsCheckbox = createCheckbox(
     optionsPanel,
-    "ChrisWowAddonEnableDemonSlayerSystemButtons",
+    `${ADDON_NAME}EnableDemonSlayerSystemButtons`,
     messages.enableDemonSlayerSystemButtons,
     "TOPLEFT",
-    controls.demonSlayerUnitFramesCheckbox,
+    controls.spellEffectResetButton,
     "BOTTOMLEFT",
     0,
-    -4,
+    -12,
     checked => {
       setEnableDemonSlayerSystemButtons(checked);
       handlers?.onDemonSlayerSystemButtonsChanged();
@@ -295,7 +448,7 @@ export function registerSettingsPanel(settingsPanelHandlers: SettingsPanelHandle
 
   controls.minimapCheckbox = createCheckbox(
     optionsPanel,
-    "ChrisWowAddonShowMinimapButton",
+    `${ADDON_NAME}ShowMinimapButton`,
     messages.showMinimapButton,
     "TOPLEFT",
     controls.demonSlayerSystemButtonsCheckbox,
@@ -310,7 +463,7 @@ export function registerSettingsPanel(settingsPanelHandlers: SettingsPanelHandle
 
   controls.loginCheckbox = createCheckbox(
     optionsPanel,
-    "ChrisWowAddonShowLoginMessage",
+    `${ADDON_NAME}ShowLoginMessage`,
     messages.showLoginMessage,
     "TOPLEFT",
     controls.minimapCheckbox,
@@ -324,7 +477,7 @@ export function registerSettingsPanel(settingsPanelHandlers: SettingsPanelHandle
 
   createButton(
     optionsPanel,
-    "ChrisWowAddonResetLaunchCount",
+    `${ADDON_NAME}ResetLaunchCount`,
     messages.resetLaunchCount,
     150,
     "TOPLEFT",
@@ -341,7 +494,7 @@ export function registerSettingsPanel(settingsPanelHandlers: SettingsPanelHandle
 
   createButton(
     optionsPanel,
-    "ChrisWowAddonPrintDebugInfo",
+    `${ADDON_NAME}PrintDebugInfo`,
     messages.printDebugInfo,
     150,
     "TOPLEFT",
@@ -360,10 +513,6 @@ export function registerSettingsPanel(settingsPanelHandlers: SettingsPanelHandle
 
   if (getSettings().enableSpellTextEffect) {
     syncSpellTextEffect();
-  }
-
-  if (getSettings().enableDemonSlayerUnitFrames) {
-    syncDemonSlayerUnitFrames();
   }
 
   if (getSettings().enableDemonSlayerSystemButtons) {

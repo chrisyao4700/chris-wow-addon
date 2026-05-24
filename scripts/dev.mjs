@@ -7,7 +7,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const tstlBin = join(root, "node_modules", ".bin", "tstl");
 const buildLua = join(root, "build", "main.lua");
 const assetsDir = join(root, "assets");
-const tocPath = join(root, "ChrisWowAddon.toc");
+const tocPath = join(root, "SlayerUI.toc");
 
 function runTstl(args, label) {
   const result = spawnSync(tstlBin, args, { cwd: root, stdio: "inherit" });

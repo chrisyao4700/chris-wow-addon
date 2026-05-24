@@ -1,40 +1,22 @@
 import { ADDON_NAME } from "../../core/config";
+import { applySpellEffectAnchorLayout } from "../spell-animation-effect/layout-settings";
+import { styleCalloutLabel } from "./client-callout-font";
 
-const FONT_SIZE = 52;
 const FADE_IN_SECONDS = 0.65;
 const MAX_HOLD_SECONDS = 2;
 const FADE_OUT_SECONDS = 2;
 const ALPHA_TICK_SECONDS = 0.05;
-const TEXT_RGB = { r: 1, g: 0.86, b: 0.35 };
-const SHADOW_RGB = { r: 0, g: 0, b: 0 };
-const SHADOW_ALPHA = 0.85;
-const CHINESE_FONT_PATHS = ["Fonts\\ARKai_T.ttf", "Fonts\\ARHeiti.ttf", "Fonts\\ARKai_C.ttf"];
-const TEXT_BOTTOM_SCREEN_PERCENT = 0.05;
 
 let overlayFrame: WowFrame | undefined;
 let textLabel: WowFontString | undefined;
 let effectSequence = 0;
 
 function applyLabelFont(label: WowFontString): void {
-  const locale = GetLocale();
-
-  if (locale === "zhCN" || locale === "zhTW") {
-    label.SetFont(CHINESE_FONT_PATHS[0], FONT_SIZE, "OUTLINE");
-    return;
-  }
-
-  for (const fontPath of CHINESE_FONT_PATHS) {
-    label.SetFont(fontPath, FONT_SIZE, "OUTLINE");
-  }
-}
-
-function getTextBottomYOffset(): number {
-  return UIParent.GetHeight() * TEXT_BOTTOM_SCREEN_PERCENT;
+  styleCalloutLabel(label);
 }
 
 function updateOverlayPosition(frame: WowFrame): void {
-  frame.ClearAllPoints();
-  frame.SetPoint("BOTTOM", UIParent, "BOTTOM", 0, getTextBottomYOffset());
+  applySpellEffectAnchorLayout(frame);
 }
 
 function ensureOverlayFrame(): WowFrame {
@@ -53,13 +35,8 @@ function ensureOverlayFrame(): WowFrame {
   frame.Hide();
 
   const label = frame.CreateFontString(`${ADDON_NAME}SpellTextLabel`, "OVERLAY");
-  applyLabelFont(label);
-  label.SetTextColor(TEXT_RGB.r, TEXT_RGB.g, TEXT_RGB.b, 1);
-  label.SetShadowColor(SHADOW_RGB.r, SHADOW_RGB.g, SHADOW_RGB.b, SHADOW_ALPHA);
-  label.SetShadowOffset(2, -2);
+  styleCalloutLabel(label);
   label.SetPoint("CENTER", frame, "CENTER", 0, 0);
-  label.SetJustifyH("CENTER");
-  label.SetJustifyV("MIDDLE");
 
   overlayFrame = frame;
   textLabel = label;
@@ -73,8 +50,7 @@ function setOverlayAlpha(alpha: number): void {
   textLabel?.SetAlpha?.(clamped);
 
   if (textLabel !== undefined) {
-    textLabel.SetTextColor(TEXT_RGB.r, TEXT_RGB.g, TEXT_RGB.b, clamped);
-    textLabel.SetShadowColor(SHADOW_RGB.r, SHADOW_RGB.g, SHADOW_RGB.b, SHADOW_ALPHA * clamped);
+    styleCalloutLabel(textLabel, clamped);
   }
 }
 
@@ -136,8 +112,24 @@ function scheduleHoldThenFadeOut(frame: WowFrame, sequence: number): void {
   });
 }
 
+/** Ensures the shared spell callout anchor frame exists and returns it. */
+export function ensureSpellTextAnchorFrame(): WowFrame {
+  return ensureOverlayFrame();
+}
+
 export function getTextEffectTimingSummary(): string {
   return `in ${FADE_IN_SECONDS}s, hold ${MAX_HOLD_SECONDS}s, out ${FADE_OUT_SECONDS}s`;
+}
+
+/** Hides the FontString fallback overlay immediately (e.g. when layered animation plays). */
+export function hideSpellTextOverlay(): void {
+  cancelEffectSequence();
+
+  if (overlayFrame !== undefined) {
+    overlayFrame.Hide();
+  }
+
+  setOverlayAlpha(1);
 }
 
 /** Shows centered bottom-screen text with fade-in, hold, and fade-out. */
@@ -151,6 +143,7 @@ export function showTextEffect(displayText: string): void {
 
   const sequence = cancelEffectSequence();
   updateOverlayPosition(frame);
+  applyLabelFont(label);
   label.SetText(displayText);
   frame.Show();
   setOverlayAlpha(0);

@@ -46,7 +46,7 @@ export const rogueSpellTextEffectMapping = defineClassSpellTextMapping({
     },
     {
       spellNames: ["Cheap Shot", "偷袭"],
-      displayText: "霞之呼吸 · 胧"
+      displayText: "霞之呼吸 · 霞散飞沫"
     },
     {
       spellNames: ["Ghostly Strike", "鬼魅攻击"],
@@ -66,7 +66,7 @@ export const rogueSpellTextEffectMapping = defineClassSpellTextMapping({
     },
     {
       spellNames: ["Evasion", "闪避"],
-      displayText: "日之呼吸 · 幻日虹"
+      displayText: "霞之呼吸 · 胧"
     },
     {
       spellNames: ["Gouge", "凿击"],

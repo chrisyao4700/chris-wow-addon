@@ -11,7 +11,6 @@ import {
 } from "./layout-state";
 import { onLayoutFrameReshow, scheduleLayoutSync } from "./scheduler";
 import { applyExpBarLayout } from "./tasks/exp-bar";
-import { installLootFrameLayoutHooks } from "./tasks/loot-frame";
 import { applyStanceBarLayout } from "./tasks/stance-bar";
 
 let blizzardLayoutHooksInstalled = false;
@@ -39,7 +38,6 @@ export function installBlizzardLayoutHooks(): void {
   }
 
   blizzardLayoutHooksInstalled = true;
-  installLootFrameLayoutHooks();
 
   if (typeof MoveMicroButtons === "function") {
     originalMoveMicroButtons = MoveMicroButtons;

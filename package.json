@@ -1,13 +1,13 @@
 {
-  "name": "chris-wow-addon",
+  "name": "slayer-ui",
   "version": "0.1.0",
-  "description": "A World of Warcraft Titan Reforged addon scaffold built with TypeScript, Node.js, and CurseForge-compatible packaging.",
+  "description": "Slayer UI — a World of Warcraft Titan Reforged addon with Demon Slayer-inspired UI.",
   "private": true,
   "type": "module",
   "scripts": {
     "clean": "node scripts/build-addon.mjs --clean",
     "typecheck": "tsc --noEmit",
-    "build": "tstl -p tsconfig.json && node scripts/build-addon.mjs",
+    "build": "node scripts/generate-spell-effect-manifest.mjs && tstl -p tsconfig.json && node scripts/build-addon.mjs",
     "dev": "node scripts/dev.mjs",
     "watch": "tstl -p tsconfig.json --watch",
     "package": "npm run build && node scripts/build-addon.mjs --zip",

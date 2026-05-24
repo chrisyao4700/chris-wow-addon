@@ -60,18 +60,23 @@ interface WowFrame {
   GetScale(): number;
   GetWidth(): number;
   SetSize(width: number, height: number): void;
-  SetPoint(point: WowPoint, relativeTo: WowFrame, relativePoint: WowPoint, x?: number, y?: number): void;
+  SetPoint(point: WowPoint, relativeTo: WowFrame | WowFontString | WowTexture, relativePoint: WowPoint, x?: number, y?: number): void;
   SetParent(parent: WowFrame): void;
   SetScale(scale: number): void;
   SetFrameStrata(strata: WowFrameStrata): void;
   SetFrameLevel(level: number): void;
   GetFrameLevel?(): number;
   SetMovable(movable: boolean): void;
+  RegisterForDrag(...buttons: string[]): void;
+  StartMoving?(): void;
+  StopMovingOrSizing?(): void;
   SetAlpha?(alpha: number): void;
   SetAttribute?(name: string, value: unknown): void;
   UnregisterAllEvents?(): void;
   Show(): void;
   Hide(): void;
+  Enable?(): void;
+  Disable?(): void;
   Raise?(): void;
   CreateAnimationGroup(): WowAnimationGroup;
   CreateFontString(name?: string, drawLayer?: string, template?: string): WowFontString;
@@ -97,6 +102,14 @@ interface WowCheckButton extends WowButton {
   SetChecked(checked: boolean): void;
 }
 
+interface WowSlider extends WowFrame {
+  SetMinMaxValues(min: number, max: number): void;
+  SetValue(value: number): void;
+  SetValueStep(step: number): void;
+  SetObeyStepOnDrag?(obey: boolean): void;
+  SetWidth(width: number): void;
+}
+
 interface WowFontString {
   Hide(): void;
   Show(): void;
@@ -119,18 +132,22 @@ interface WowFontString {
 }
 
 interface WowTexture {
-  GetTexture(): string;
+  ClearAllPoints?(): void;
+  GetTexture(): string | number;
   GetWidth(): number;
   GetHeight(): number;
   IsShown(): boolean;
   Hide(): void;
   Show(): void;
+  SetAllPoints?(): void;
+  SetColorTexture?(red: number, green: number, blue: number, alpha?: number): void;
   SetPoint(point: WowPoint, relativeTo: WowFrame | WowTexture, relativePoint: WowPoint, x?: number, y?: number): void;
   SetSize(width: number, height: number): void;
   SetTexCoord(left: number, right: number, top: number, bottom: number): void;
   SetTexture(texturePath: string): void;
   SetVertexColor?(red: number, green: number, blue: number, alpha?: number): void;
   SetBlendMode?(mode: "ADD" | "BLEND" | "MOD" | string): void;
+  SetDrawLayer?(layer: string, subLevel?: number): void;
   SetWidth?(width: number): void;
 }
 
@@ -191,6 +208,12 @@ declare function CreateFrame(
   parent?: WowFrame,
   template?: string
 ): WowCheckButton;
+declare function CreateFrame(
+  frameType: "Slider",
+  name?: string,
+  parent?: WowFrame,
+  template?: string
+): WowSlider;
 
 declare function hooksecurefunc(
   target: string | ((...args: unknown[]) => void),
