@@ -233,6 +233,26 @@ declare function UnitClass(unit: WowUnitId): LuaMultiReturn<[string, string, num
 declare function UnitRace(unit: WowUnitId): LuaMultiReturn<[string, string, number]>;
 declare function UnitLevel(unit: WowUnitId): number | undefined;
 declare function UnitExists(unit: WowUnitId): boolean;
+declare function UnitAura(
+  unit: WowUnitId,
+  index: number,
+  filter?: string
+): LuaMultiReturn<
+  [
+    string | undefined,
+    unknown,
+    number | undefined,
+    string | undefined,
+    number | undefined,
+    number | undefined,
+    string | undefined,
+    boolean | undefined,
+    boolean | undefined,
+    number | undefined,
+    number | undefined,
+    number | undefined
+  ]
+>;
 declare function UnitHealth(unit: WowUnitId): number | undefined;
 declare function UnitHealthMax(unit: WowUnitId): number | undefined;
 declare function UnitPower(unit: WowUnitId, powerType?: number): number | undefined;
@@ -279,6 +299,13 @@ declare const CombatLogGetCurrentEventInfo:
     >)
   | undefined;
 declare function GetTime(): number;
+declare function PlaySoundFile(
+  sound: string | number,
+  channel?: string
+): LuaMultiReturn<[boolean | undefined, number | undefined]>;
+declare function GetCVar(name: string): string | undefined;
+declare function SetCVar(name: string, value: string | number): void;
+declare function StopSound(soundHandle: number, fadeoutTime?: number): void;
 declare function GetBuildInfo(): LuaMultiReturn<[string, string, string, number]>;
 declare function GetCursorPosition(): LuaMultiReturn<[number, number]>;
 declare function GetScreenWidth(): number;
@@ -295,6 +322,33 @@ declare const InterfaceOptionsFrame_OpenToCategory: ((panel: WowOptionsPanel) =>
 declare const C_Timer: {
   After: (this: void, seconds: number, callback: () => void) => void;
 };
+declare const C_UnitAuras:
+  | {
+      GetBuffDataByIndex?: (
+        unitToken: string,
+        index: number
+      ) => {
+        name?: string;
+        spellId?: number;
+        applications?: number;
+        duration?: number;
+        expirationTime?: number;
+        points?: number;
+      };
+      GetAuraDataByIndex?: (
+        unitToken: string,
+        index: number,
+        filter?: string
+      ) => {
+        name?: string;
+        spellId?: number;
+        applications?: number;
+        duration?: number;
+        expirationTime?: number;
+        points?: number;
+      };
+    }
+  | undefined;
 declare const Minimap: WowFrame;
 declare const Settings: WowSettingsApi | undefined;
 declare const UIParent: WowFrame;

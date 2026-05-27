@@ -7,7 +7,7 @@
   "scripts": {
     "clean": "node scripts/build-addon.mjs --clean",
     "typecheck": "tsc --noEmit",
-    "build": "node scripts/generate-spell-effect-manifest.mjs && tstl -p tsconfig.json && node scripts/build-addon.mjs",
+    "build": "node scripts/generate-spell-effect-manifest.mjs && node scripts/generate-buff-effect-manifest.mjs && node scripts/generate-spell-voice-manifest.mjs && tstl -p tsconfig.json && node scripts/build-addon.mjs",
     "dev": "node scripts/dev.mjs",
     "watch": "tstl -p tsconfig.json --watch",
     "package": "npm run build && node scripts/build-addon.mjs --zip",

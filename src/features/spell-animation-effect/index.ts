@@ -30,7 +30,7 @@ import {
   resetSpellEffectLayoutSettings,
   updateSpellEffectUserScale
 } from "./layout-settings";
-import { resolveSpellAnimationSlug } from "./spell-slugs";
+import { resolveSpellAnimationSlug, type SpellAnimationSlug } from "./spell-slugs";
 
 export {
   clearSpellEffectAssetCache,
@@ -72,9 +72,16 @@ export function getSpellAnimationAssetStatusLines(displayText: string): string[]
   ] as const;
 
   const lines = mvpRoles.map(([role, path]) => `${role}: ${getSpellEffectAssetProbeSummary(path)}`);
-
+  lines.push(`text mode: ${canPlaySpellAnimation(slug) ? (hasSpellTextTextures(slug) ? "texture" : "font fallback") : "unavailable"}`);
   lines.push(`animation ready: ${canPlaySpellAnimation(slug) ? "yes" : "no"}`);
   return lines;
+}
+
+function hasSpellTextTextures(slug: SpellAnimationSlug): boolean {
+  return (
+    getSpellEffectAssetProbeSummary(getSpellAssetPath(slug.styleSlug, slug.spellSlug, "text_main")) !== "missing" &&
+    getSpellEffectAssetProbeSummary(getSpellAssetPath(slug.styleSlug, slug.spellSlug, "text_shadow")) !== "missing"
+  );
 }
 
 export function syncSpellAnimationEffect(): void {

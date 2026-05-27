@@ -11,6 +11,14 @@ import {
   toggleSpellEffectLayoutEditor
 } from "./features/spell-animation-effect";
 import {
+  isBuffTriggerLayoutEditorActive,
+  isBuffTriggerEffectEnabled,
+  isBuffTriggerStyleSlug,
+  previewBuffTriggerEffect,
+  printBuffTriggerEffectStatus,
+  toggleBuffTriggerLayoutEditor
+} from "./features/buff-trigger-effect";
+import {
   printDemonSlayerSystemButtonStatus,
   syncDemonSlayerSystemButtons
 } from "./features/system-buttons";
@@ -105,6 +113,65 @@ function handleSlashCommand(message?: string): void {
 
   if (command === "effect" || command === "effect status") {
     printSpellTextEffectStatus();
+    return;
+  }
+
+  if (command === "buff test") {
+    if (!isBuffTriggerEffectEnabled()) {
+      addonPrint("Buff trigger effects are disabled in settings.");
+      return;
+    }
+
+    const result = previewBuffTriggerEffect();
+    addonPrint(
+      result === "played"
+        ? "Buff trigger preview shown above your character (mist_breathing)."
+        : `Buff trigger preview failed (${result}). Run /slayer buff for asset/status details.`
+    );
+    return;
+  }
+
+  if (command.startsWith("buff test ")) {
+    if (!isBuffTriggerEffectEnabled()) {
+      addonPrint("Buff trigger effects are disabled in settings.");
+      return;
+    }
+
+    const styleSlug = command.slice("buff test ".length).trim();
+
+    if (!isBuffTriggerStyleSlug(styleSlug)) {
+      addonPrint(`Unknown buff style slug: ${styleSlug}`);
+      return;
+    }
+
+    const result = previewBuffTriggerEffect(styleSlug);
+    addonPrint(
+      result === "played"
+        ? `Buff trigger preview shown (${styleSlug}).`
+        : `Buff trigger preview failed (${result}) for ${styleSlug}. Run /slayer buff for details.`
+    );
+    return;
+  }
+
+  if (command === "buff" || command === "buff status") {
+    printBuffTriggerEffectStatus();
+    return;
+  }
+
+  if (command === "buff layout") {
+    if (!isBuffTriggerEffectEnabled()) {
+      addonPrint("Buff trigger effects are disabled in settings.");
+      return;
+    }
+
+    if (isBuffTriggerLayoutEditorActive()) {
+      toggleBuffTriggerLayoutEditor();
+      addonPrint("Buff trigger layout editor closed.");
+      return;
+    }
+
+    toggleBuffTriggerLayoutEditor();
+    addonPrint("Buff trigger layout editor enabled. Drag the highlight to move it.");
     return;
   }
 

@@ -10,7 +10,8 @@ export type PlayerClassFileName =
   | "HUNTER"
   | "SHAMAN"
   | "PALADIN"
-  | "ROGUE";
+  | "ROGUE"
+  | "DEATHKNIGHT";
 
 export const PLAYER_CLASS_FILE_NAMES: readonly PlayerClassFileName[] = [
   "WARRIOR",
@@ -21,7 +22,8 @@ export const PLAYER_CLASS_FILE_NAMES: readonly PlayerClassFileName[] = [
   "HUNTER",
   "SHAMAN",
   "PALADIN",
-  "ROGUE"
+  "ROGUE",
+  "DEATHKNIGHT"
 ];
 
 export type SpellTextEffectClassMapping = SpellTextEffectBinding[];

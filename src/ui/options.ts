@@ -7,6 +7,8 @@ import {
   setEnableCustomActionLayout,
   setEnableDemonSlayerSystemButtons,
   setEnableSpellTextEffect,
+  setEnableSpellVoiceCallouts,
+  setSpellVoiceCalloutVolume,
   setShowLoginMessage,
   setShowMinimapButton
 } from "../core/db";
@@ -22,7 +24,20 @@ import {
   syncSpellEffectLayout,
   updateSpellEffectUserScale
 } from "../features/spell-animation-effect";
+import {
+  enterBuffTriggerLayoutEditor,
+  exitBuffTriggerLayoutEditor,
+  isBuffTriggerLayoutEditorActive,
+  MAX_BUFF_TRIGGER_USER_SCALE,
+  MIN_BUFF_TRIGGER_USER_SCALE,
+  resetBuffTriggerLayoutSettings,
+  updateBuffTriggerUserScale
+} from "../features/buff-trigger-effect";
 import { syncSpellTextEffect } from "../features/spell-text-effect";
+import {
+  MAX_SPELL_VOICE_CALLOUT_VOLUME,
+  MIN_SPELL_VOICE_CALLOUT_VOLUME
+} from "../features/spell-voice-callout";
 import { syncDemonSlayerSystemButtons } from "../features/system-buttons";
 import { addonPrint } from "../platform/wow";
 
@@ -31,6 +46,7 @@ type SettingsPanelHandlers = {
   onActionLayoutChanged: () => void;
   onSpellTextEffectChanged: () => void;
   onSpellEffectLayoutChanged: () => void;
+  onBuffTriggerLayoutChanged: () => void;
   onDemonSlayerSystemButtonsChanged: () => void;
 };
 
@@ -39,11 +55,19 @@ type SettingsPanelControls = {
   featuresHeader?: WowFontString;
   actionLayoutCheckbox?: WowCheckButton;
   spellTextEffectCheckbox?: WowCheckButton;
+  spellVoiceCalloutCheckbox?: WowCheckButton;
+  spellVoiceVolumeSlider?: WowSlider;
+  spellVoiceVolumeValue?: WowFontString;
   spellEffectLayoutHeader?: WowFontString;
   spellEffectScaleSlider?: WowSlider;
   spellEffectScaleValue?: WowFontString;
   spellEffectAdjustButton?: WowButton;
   spellEffectResetButton?: WowButton;
+  buffTriggerLayoutHeader?: WowFontString;
+  buffTriggerScaleSlider?: WowSlider;
+  buffTriggerScaleValue?: WowFontString;
+  buffTriggerAdjustButton?: WowButton;
+  buffTriggerResetButton?: WowButton;
   demonSlayerSystemButtonsCheckbox?: WowCheckButton;
   minimapCheckbox?: WowCheckButton;
   loginCheckbox?: WowCheckButton;
@@ -141,6 +165,28 @@ function createSlider(
   return { slider, valueLabel };
 }
 
+function refreshSpellVoiceCalloutControls(): void {
+  const messages = getMessages();
+  const settings = getSettings();
+  const enabled = settings.enableSpellVoiceCallouts;
+
+  if (controls.spellVoiceVolumeSlider !== undefined) {
+    controls.spellVoiceVolumeSlider.SetValue(settings.spellVoiceCalloutVolume);
+
+    if (enabled) {
+      controls.spellVoiceVolumeSlider.Enable?.();
+    } else {
+      controls.spellVoiceVolumeSlider.Disable?.();
+    }
+  }
+
+  if (controls.spellVoiceVolumeValue !== undefined) {
+    controls.spellVoiceVolumeValue.SetText(
+      messages.spellVoiceCalloutVolumeValue(settings.spellVoiceCalloutVolume)
+    );
+  }
+}
+
 function refreshSpellEffectLayoutControls(): void {
   const messages = getMessages();
   const settings = getSettings();
@@ -181,6 +227,52 @@ function refreshSpellEffectLayoutControls(): void {
   }
 }
 
+function isBuffTriggerControlEnabled(): boolean {
+  const settings = getSettings();
+
+  return settings.enableBuffTriggerEffect ?? settings.enableSpellTextEffect;
+}
+
+function refreshBuffTriggerLayoutControls(): void {
+  const messages = getMessages();
+  const settings = getSettings();
+  const enabled = isBuffTriggerControlEnabled();
+
+  if (controls.buffTriggerScaleSlider !== undefined) {
+    controls.buffTriggerScaleSlider.SetValue(settings.buffTriggerEffectUserScale);
+
+    if (enabled) {
+      controls.buffTriggerScaleSlider.Enable?.();
+    } else {
+      controls.buffTriggerScaleSlider.Disable?.();
+    }
+  }
+
+  if (controls.buffTriggerScaleValue !== undefined) {
+    controls.buffTriggerScaleValue.SetText(messages.spellEffectLayoutScaleValue(settings.buffTriggerEffectUserScale));
+  }
+
+  if (controls.buffTriggerAdjustButton !== undefined) {
+    controls.buffTriggerAdjustButton.SetText(
+      isBuffTriggerLayoutEditorActive() ? messages.spellEffectLayoutDone : messages.buffTriggerLayoutAdjust
+    );
+
+    if (enabled) {
+      controls.buffTriggerAdjustButton.Enable?.();
+    } else {
+      controls.buffTriggerAdjustButton.Disable?.();
+    }
+  }
+
+  if (controls.buffTriggerResetButton !== undefined) {
+    if (enabled) {
+      controls.buffTriggerResetButton.Enable?.();
+    } else {
+      controls.buffTriggerResetButton.Disable?.();
+    }
+  }
+}
+
 function createButton(
   parent: WowFrame,
   name: string,
@@ -217,6 +309,10 @@ export function refreshSettingsPanel(): void {
     controls.spellTextEffectCheckbox.SetChecked(settings.enableSpellTextEffect);
   }
 
+  if (controls.spellVoiceCalloutCheckbox !== undefined) {
+    controls.spellVoiceCalloutCheckbox.SetChecked(settings.enableSpellVoiceCallouts);
+  }
+
   if (controls.demonSlayerSystemButtonsCheckbox !== undefined) {
     controls.demonSlayerSystemButtonsCheckbox.SetChecked(settings.enableDemonSlayerSystemButtons);
   }
@@ -229,7 +325,9 @@ export function refreshSettingsPanel(): void {
     controls.loginCheckbox.SetChecked(settings.showLoginMessage);
   }
 
+  refreshSpellVoiceCalloutControls();
   refreshSpellEffectLayoutControls();
+  refreshBuffTriggerLayoutControls();
 }
 
 export function openSettingsPanel(): void {
@@ -349,18 +447,54 @@ export function registerSettingsPanel(settingsPanelHandlers: SettingsPanelHandle
 
       if (!checked) {
         exitSpellEffectLayoutEditor();
+        exitBuffTriggerLayoutEditor();
       }
 
       handlers?.onSpellTextEffectChanged();
     }
   );
 
+  controls.spellVoiceCalloutCheckbox = createCheckbox(
+    optionsPanel,
+    `${ADDON_NAME}EnableSpellVoiceCallouts`,
+    messages.enableSpellVoiceCallouts,
+    "TOPLEFT",
+    controls.spellTextEffectCheckbox,
+    "BOTTOMLEFT",
+    0,
+    -4,
+    checked => {
+      setEnableSpellVoiceCallouts(checked);
+      refreshSettingsPanel();
+    }
+  );
+
+  const voiceVolumeControls = createSlider(
+    optionsPanel,
+    `${ADDON_NAME}SpellVoiceVolume`,
+    messages.spellVoiceCalloutVolume,
+    "TOPLEFT",
+    controls.spellVoiceCalloutCheckbox,
+    "BOTTOMLEFT",
+    28,
+    -8,
+    MIN_SPELL_VOICE_CALLOUT_VOLUME,
+    MAX_SPELL_VOICE_CALLOUT_VOLUME,
+    0.05,
+    value => {
+      setSpellVoiceCalloutVolume(value);
+      refreshSettingsPanel();
+    }
+  );
+  controls.spellVoiceVolumeSlider = voiceVolumeControls.slider;
+  controls.spellVoiceVolumeValue = voiceVolumeControls.valueLabel;
+
   controls.spellEffectLayoutHeader = createLabel(
     optionsPanel,
     messages.spellEffectLayoutHeader,
     "GameFontNormal",
     "TOPLEFT",
-    controls.spellTextEffectCheckbox,
+    voiceVolumeControls.slider,
     "BOTTOMLEFT",
     0,
     -12
@@ -431,12 +565,88 @@ export function registerSettingsPanel(settingsPanelHandlers: SettingsPanelHandle
     }
   );
 
+  controls.buffTriggerLayoutHeader = createLabel(
+    optionsPanel,
+    messages.buffTriggerLayoutHeader,
+    "GameFontNormal",
+    "TOPLEFT",
+    controls.spellEffectResetButton,
+    "BOTTOMLEFT",
+    0,
+    -12
+  );
+
+  const buffScaleControls = createSlider(
+    optionsPanel,
+    `${ADDON_NAME}BuffTriggerScale`,
+    messages.buffTriggerLayoutScale,
+    "TOPLEFT",
+    controls.buffTriggerLayoutHeader,
+    "BOTTOMLEFT",
+    0,
+    -8,
+    MIN_BUFF_TRIGGER_USER_SCALE,
+    MAX_BUFF_TRIGGER_USER_SCALE,
+    0.05,
+    value => {
+      updateBuffTriggerUserScale(value);
+      handlers?.onBuffTriggerLayoutChanged();
+    }
+  );
+  controls.buffTriggerScaleSlider = buffScaleControls.slider;
+  controls.buffTriggerScaleValue = buffScaleControls.valueLabel;
+
+  controls.buffTriggerAdjustButton = createButton(
+    optionsPanel,
+    `${ADDON_NAME}BuffTriggerAdjust`,
+    messages.buffTriggerLayoutAdjust,
+    140,
+    "TOPLEFT",
+    buffScaleControls.slider,
+    "BOTTOMLEFT",
+    0,
+    -18,
+    () => {
+      if (!isBuffTriggerControlEnabled()) {
+        return;
+      }
+
+      if (isBuffTriggerLayoutEditorActive()) {
+        exitBuffTriggerLayoutEditor();
+        addonPrint(messages.buffTriggerLayoutEditorClosed);
+      } else {
+        enterBuffTriggerLayoutEditor();
+        addonPrint(messages.buffTriggerLayoutEditorOpened);
+      }
+
+      refreshSettingsPanel();
+    }
+  );
+
+  controls.buffTriggerResetButton = createButton(
+    optionsPanel,
+    `${ADDON_NAME}BuffTriggerResetLayout`,
+    messages.buffTriggerLayoutReset,
+    140,
+    "TOPLEFT",
+    controls.buffTriggerAdjustButton,
+    "BOTTOMLEFT",
+    0,
+    -8,
+    () => {
+      resetBuffTriggerLayoutSettings();
+      handlers?.onBuffTriggerLayoutChanged();
+      addonPrint(messages.buffTriggerLayoutResetConfirm);
+      refreshSettingsPanel();
+    }
+  );
+
   controls.demonSlayerSystemButtonsCheckbox = createCheckbox(
     optionsPanel,
     `${ADDON_NAME}EnableDemonSlayerSystemButtons`,
     messages.enableDemonSlayerSystemButtons,
     "TOPLEFT",
-    controls.spellEffectResetButton,
+    controls.buffTriggerResetButton,
     "BOTTOMLEFT",
     0,
     -12,

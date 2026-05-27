@@ -6,6 +6,7 @@ import { registerAddonEvents } from "./core/events";
 import { registerActionLayout, syncActionLayout } from "./features/action-layout";
 import { registerSpellTextEffect, syncSpellTextEffect } from "./features/spell-text-effect";
 import { registerSpellAnimationEffect, syncSpellAnimationEffect } from "./features/spell-animation-effect";
+import { registerBuffTriggerEffect, syncBuffTriggerEffect } from "./features/buff-trigger-effect";
 import {
   registerDemonSlayerSystemButtons,
   syncDemonSlayerSystemButtons
@@ -18,6 +19,7 @@ registerSettingsPanel({
   onActionLayoutChanged: () => syncActionLayout(),
   onSpellTextEffectChanged: () => syncSpellTextEffect(),
   onSpellEffectLayoutChanged: () => syncSpellAnimationEffect(),
+  onBuffTriggerLayoutChanged: () => syncBuffTriggerEffect(),
   onDemonSlayerSystemButtonsChanged: () => syncDemonSlayerSystemButtons()
 });
 registerSlashCommands(openSettingsPanel);
@@ -26,6 +28,7 @@ registerActionLayout();
 registerAddonEvents();
 registerSpellTextEffect();
 registerSpellAnimationEffect();
+registerBuffTriggerEffect();
 registerDemonSlayerSystemButtons();
 
 export {};

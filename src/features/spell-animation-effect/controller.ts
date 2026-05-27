@@ -27,6 +27,14 @@ function acquireEffect(): SpellEffectInstance | undefined {
     return undefined;
   }
 
+  const activeEffect = pool.find(effect => effect.active);
+
+  if (activeEffect !== undefined) {
+    activeEffect.Stop();
+    activeEffect.SetAnchorFrame(anchorFrame);
+    return activeEffect;
+  }
+
   for (const effect of pool) {
     if (!effect.active) {
       effect.SetAnchorFrame(anchorFrame);
@@ -35,14 +43,6 @@ function acquireEffect(): SpellEffectInstance | undefined {
   }
 
   if (pool.length >= MAX_POOL_SIZE) {
-    const activeEffect = pool.find(effect => effect.active);
-
-    if (activeEffect !== undefined) {
-      activeEffect.Stop();
-      activeEffect.SetAnchorFrame(anchorFrame);
-      return activeEffect;
-    }
-
     return undefined;
   }
 
@@ -89,7 +89,7 @@ export function tryShowSpellAnimationEffect(displayText: string): SpellAnimation
 
   const effect = acquireEffect();
 
-  if (effect === undefined || !effect.Configure(slug)) {
+  if (effect === undefined || !effect.Configure(slug, displayText)) {
     return effect === undefined ? "pool_unavailable" : "missing_assets";
   }
 
@@ -102,5 +102,5 @@ export function getSpellAnimationPoolSize(): number {
 }
 
 export function getSpellAnimationTimingSummary(): string {
-  return "0.92s layered animation, 0.35s retrigger cooldown";
+  return "1.5s intro, 3s hold, 0.5s fade; VFX and text fade together";
 }

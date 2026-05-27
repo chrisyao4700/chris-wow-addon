@@ -4,10 +4,16 @@ export type SlayerUISettings = {
   minimapButtonAngle?: number;
   enableCustomActionLayout?: boolean;
   enableSpellTextEffect?: boolean;
+  enableSpellVoiceCallouts?: boolean;
+  spellVoiceCalloutVolume?: number;
   enableDemonSlayerSystemButtons?: boolean;
   spellEffectUserScale?: number;
   spellEffectOffsetX?: number;
   spellEffectOffsetY?: number;
+  enableBuffTriggerEffect?: boolean;
+  buffTriggerEffectUserScale?: number;
+  buffTriggerEffectOffsetX?: number;
+  buffTriggerEffectOffsetY?: number;
 };
 
 export type SlayerUIState = {
@@ -32,7 +38,11 @@ export function ensureSavedVariables(): SlayerUIState {
   return SlayerUIDB;
 }
 
-export function getSettings(): Required<SlayerUISettings> {
+export type ResolvedSlayerUISettings = Omit<Required<SlayerUISettings>, "enableBuffTriggerEffect"> & {
+  enableBuffTriggerEffect?: boolean;
+};
+
+export function getSettings(): ResolvedSlayerUISettings {
   const state = ensureSavedVariables();
 
   if (state.settings === undefined) {
@@ -45,10 +55,16 @@ export function getSettings(): Required<SlayerUISettings> {
     minimapButtonAngle: state.settings.minimapButtonAngle ?? 225,
     enableCustomActionLayout: state.settings.enableCustomActionLayout !== false,
     enableSpellTextEffect: state.settings.enableSpellTextEffect !== false,
+    enableSpellVoiceCallouts: state.settings.enableSpellVoiceCallouts !== false,
+    spellVoiceCalloutVolume: clampSpellVoiceCalloutVolume(state.settings.spellVoiceCalloutVolume ?? 1),
     enableDemonSlayerSystemButtons: state.settings.enableDemonSlayerSystemButtons !== false,
     spellEffectUserScale: state.settings.spellEffectUserScale ?? 1,
     spellEffectOffsetX: state.settings.spellEffectOffsetX ?? 0,
-    spellEffectOffsetY: state.settings.spellEffectOffsetY ?? 0
+    spellEffectOffsetY: state.settings.spellEffectOffsetY ?? 0,
+    enableBuffTriggerEffect: state.settings.enableBuffTriggerEffect,
+    buffTriggerEffectUserScale: state.settings.buffTriggerEffectUserScale ?? 1,
+    buffTriggerEffectOffsetX: state.settings.buffTriggerEffectOffsetX ?? 0,
+    buffTriggerEffectOffsetY: state.settings.buffTriggerEffectOffsetY ?? 120
   };
 }
 
@@ -92,6 +108,48 @@ export function resetSpellEffectLayout(): void {
   state.settings.spellEffectUserScale = 1;
   state.settings.spellEffectOffsetX = 0;
   state.settings.spellEffectOffsetY = 0;
+}
+
+export function setBuffTriggerEffectUserScale(buffTriggerEffectUserScale: number): void {
+  const state = ensureSavedVariables();
+
+  if (state.settings === undefined) {
+    state.settings = {};
+  }
+
+  state.settings.buffTriggerEffectUserScale = buffTriggerEffectUserScale;
+}
+
+export function setBuffTriggerEffectOffsetX(buffTriggerEffectOffsetX: number): void {
+  const state = ensureSavedVariables();
+
+  if (state.settings === undefined) {
+    state.settings = {};
+  }
+
+  state.settings.buffTriggerEffectOffsetX = buffTriggerEffectOffsetX;
+}
+
+export function setBuffTriggerEffectOffsetY(buffTriggerEffectOffsetY: number): void {
+  const state = ensureSavedVariables();
+
+  if (state.settings === undefined) {
+    state.settings = {};
+  }
+
+  state.settings.buffTriggerEffectOffsetY = buffTriggerEffectOffsetY;
+}
+
+export function resetBuffTriggerEffectLayout(): void {
+  const state = ensureSavedVariables();
+
+  if (state.settings === undefined) {
+    state.settings = {};
+  }
+
+  state.settings.buffTriggerEffectUserScale = 1;
+  state.settings.buffTriggerEffectOffsetX = 0;
+  state.settings.buffTriggerEffectOffsetY = 120;
 }
 
 export function setEnableDemonSlayerSystemButtons(enableDemonSlayerSystemButtons: boolean): void {
@@ -152,6 +210,38 @@ export function setEnableSpellTextEffect(enableSpellTextEffect: boolean): void {
   }
 
   state.settings.enableSpellTextEffect = enableSpellTextEffect;
+}
+
+export function setEnableSpellVoiceCallouts(enableSpellVoiceCallouts: boolean): void {
+  const state = ensureSavedVariables();
+
+  if (state.settings === undefined) {
+    state.settings = {};
+  }
+
+  state.settings.enableSpellVoiceCallouts = enableSpellVoiceCallouts;
+}
+
+function clampSpellVoiceCalloutVolume(spellVoiceCalloutVolume: number): number {
+  if (spellVoiceCalloutVolume < 0) {
+    return 0;
+  }
+
+  if (spellVoiceCalloutVolume > 4) {
+    return 4;
+  }
+
+  return spellVoiceCalloutVolume;
+}
+
+export function setSpellVoiceCalloutVolume(spellVoiceCalloutVolume: number): void {
+  const state = ensureSavedVariables();
+
+  if (state.settings === undefined) {
+    state.settings = {};
+  }
+
+  state.settings.spellVoiceCalloutVolume = clampSpellVoiceCalloutVolume(spellVoiceCalloutVolume);
 }
 
 export function getLaunchCount(): number {

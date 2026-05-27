@@ -83,6 +83,18 @@ async function copyBuildArtifacts() {
   if (existsSync(spellEffectAssetsDir)) {
     await cp(spellEffectAssetsDir, join(distAssets, "spell-effects"), { recursive: true });
   }
+
+  const buffEffectAssetsDir = join(paths.assets, "buff-effects");
+
+  if (existsSync(buffEffectAssetsDir)) {
+    await cp(buffEffectAssetsDir, join(distAssets, "buff-effects"), { recursive: true });
+  }
+
+  const spellVoiceAssetsDir = join(paths.assets, "spell-voices");
+
+  if (existsSync(spellVoiceAssetsDir)) {
+    await cp(spellVoiceAssetsDir, join(distAssets, "spell-voices"), { recursive: true });
+  }
 }
 
 function zipDist() {

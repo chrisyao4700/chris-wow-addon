@@ -1,5 +1,6 @@
 import type { ClassSpellTextMappingFile } from "../class-mapping-file";
 import type { PlayerClassFileName } from "../types";
+import { deathKnightSpellTextEffectMapping } from "./death-knight";
 import { druidSpellTextEffectMapping } from "./druid";
 import { hunterSpellTextEffectMapping } from "./hunter";
 import { mageSpellTextEffectMapping } from "./mage";
@@ -10,6 +11,7 @@ import { shamanSpellTextEffectMapping } from "./shaman";
 import { warlockSpellTextEffectMapping } from "./warlock";
 import { warriorSpellTextEffectMapping } from "./warrior";
 
+export { deathKnightSpellTextEffectMapping } from "./death-knight";
 export { druidSpellTextEffectMapping } from "./druid";
 export { hunterSpellTextEffectMapping } from "./hunter";
 export { mageSpellTextEffectMapping } from "./mage";
@@ -29,5 +31,6 @@ export const CLASS_SPELL_TEXT_EFFECT_MAPPING_FILES: Record<PlayerClassFileName, 
   HUNTER: hunterSpellTextEffectMapping,
   SHAMAN: shamanSpellTextEffectMapping,
   PALADIN: paladinSpellTextEffectMapping,
-  ROGUE: rogueSpellTextEffectMapping
+  ROGUE: rogueSpellTextEffectMapping,
+  DEATHKNIGHT: deathKnightSpellTextEffectMapping
 };

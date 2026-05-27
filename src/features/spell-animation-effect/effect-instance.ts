@@ -1,10 +1,14 @@
 import { ADDON_NAME } from "../../core/config";
+import { styleCalloutLabel, resolveClientCalloutFontPath } from "../spell-text-effect/client-callout-font";
 import {
   clamp01,
   easeOutBack,
   easeOutQuad,
   EFFECT_DISPLAY_SCALE,
-  EFFECT_DURATION_SECONDS,
+  EFFECT_INTRO_SECONDS,
+  EFFECT_TOTAL_SECONDS,
+  effectLifecycleFadeMultiplier,
+  introKeyframe,
   lerp,
   segmentProgress,
   setSpriteFrame,
@@ -61,6 +65,7 @@ type LayerMountFrames = {
 type ResolvedSpellEffectAssets = {
   styleSlug: string;
   spellSlug: string;
+  usesFontText: boolean;
   impactFlash?: string;
   energyBack?: string;
   energyFront?: string;
@@ -71,6 +76,12 @@ type ResolvedSpellEffectAssets = {
   textSheen?: string;
   inkBurst?: string;
   speedLines?: string;
+};
+
+type FontTextOverlay = {
+  label: WowFontString;
+  parent: WowFrame;
+  enabled: boolean;
 };
 
 type EffectDrawLayer = "BACKGROUND" | "ARTWORK" | "OVERLAY" | "HIGHLIGHT";
@@ -93,6 +104,7 @@ export type SpellEffectInstance = {
   active: boolean;
   startTime: number;
   assets?: ResolvedSpellEffectAssets;
+  fontText: FontTextOverlay;
   impactFlash: EffectLayer;
   atmosphere: EffectLayer;
   energyBack: EffectLayer;
@@ -104,7 +116,7 @@ export type SpellEffectInstance = {
   speedLines: EffectLayer;
   energyFront: EffectLayer;
   SetAnchorFrame: (anchorFrame: WowFrame) => void;
-  Configure: (slug: SpellAnimationSlug) => boolean;
+  Configure: (slug: SpellAnimationSlug, displayText: string) => boolean;
   Play: () => void;
   Stop: () => void;
 };
@@ -232,7 +244,8 @@ function setLayerAlpha(layer: EffectLayer, alpha: number): void {
 function resolveMvpAssets(slug: SpellAnimationSlug): ResolvedSpellEffectAssets | undefined {
   const assets: ResolvedSpellEffectAssets = {
     styleSlug: slug.styleSlug,
-    spellSlug: slug.spellSlug
+    spellSlug: slug.spellSlug,
+    usesFontText: false
   };
 
   const styleRoles: StylePackRole[] = ["impact_flash", "energy_back", "particles_4x4", "energy_front", "atmosphere"];
@@ -259,18 +272,39 @@ function resolveMvpAssets(slug: SpellAnimationSlug): ResolvedSpellEffectAssets |
   assets.inkBurst = resolveSharedAssetPath("shared_ink_burst_01" as SharedOverlayRole);
   assets.speedLines = resolveSharedAssetPath("shared_speed_lines_01" as SharedOverlayRole);
 
-  const hasMvpPack =
+  const hasStylePack =
     assets.impactFlash !== undefined &&
     assets.energyBack !== undefined &&
-    assets.particles !== undefined &&
-    assets.textMain !== undefined &&
-    assets.textShadow !== undefined;
+    assets.particles !== undefined;
 
-  if (!hasMvpPack) {
+  if (!hasStylePack) {
     return undefined;
   }
 
+  assets.usesFontText = assets.textMain === undefined || assets.textShadow === undefined;
   return assets;
+}
+
+function updatePopFontText(
+  label: WowFontString,
+  parent: WowFrame,
+  elapsedSeconds: number,
+  startSeconds: number,
+  endSeconds: number,
+  settleY: number
+): void {
+  const progress = segmentProgress(elapsedSeconds, startSeconds, endSeconds);
+  const eased = easeOutBack(progress);
+  const alpha = clamp01(progress <= 0 ? 0 : progress);
+  const scale = lerp(0.78, progress >= 1 ? 1 : 1.1, eased);
+  const settledAlpha = elapsedSeconds >= endSeconds ? 1 : alpha;
+  const finalAlpha = settledAlpha * effectLifecycleFadeMultiplier(elapsedSeconds);
+
+  styleCalloutLabel(label, finalAlpha);
+  label.SetPoint("CENTER", parent, "CENTER", 0, settleY);
+
+  const baseSize = 52 * EFFECT_DISPLAY_SCALE;
+  label.SetFont(resolveClientCalloutFontPath(), baseSize * scale, "OUTLINE");
 }
 
 function updatePopLayer(
@@ -284,8 +318,8 @@ function updatePopLayer(
   const eased = easeOutBack(progress);
   const alpha = clamp01(progress <= 0 ? 0 : progress);
   const scale = lerp(0.78, progress >= 1 ? 1 : 1.1, eased);
-  const fadeOut = segmentProgress(elapsedSeconds, 0.7, EFFECT_DURATION_SECONDS);
-  const finalAlpha = alpha * (1 - easeOutQuad(fadeOut));
+  const settledAlpha = elapsedSeconds >= endSeconds ? 1 : alpha;
+  const finalAlpha = settledAlpha * effectLifecycleFadeMultiplier(elapsedSeconds);
 
   setLayerAlpha(layer, finalAlpha);
 
@@ -302,7 +336,7 @@ function updatePopLayer(
 }
 
 function updateFlashLayer(layer: EffectLayer, elapsedSeconds: number): void {
-  const progress = segmentProgress(elapsedSeconds, 0, 0.08);
+  const progress = segmentProgress(elapsedSeconds, 0, introKeyframe(0.08));
 
   if (progress <= 0 || progress >= 1) {
     setLayerAlpha(layer, 0);
@@ -317,7 +351,7 @@ function updateFlashLayer(layer: EffectLayer, elapsedSeconds: number): void {
 }
 
 function updateEnergyBackLayer(layer: EffectLayer, elapsedSeconds: number): void {
-  const progress = segmentProgress(elapsedSeconds, 0.03, 0.16);
+  const progress = segmentProgress(elapsedSeconds, introKeyframe(0.03), introKeyframe(0.16));
 
   if (progress <= 0) {
     setLayerAlpha(layer, 0);
@@ -326,8 +360,7 @@ function updateEnergyBackLayer(layer: EffectLayer, elapsedSeconds: number): void
 
   const alpha = clamp01(progress);
   const scaleX = lerp(0.65, 1.05, easeOutQuad(progress));
-  const fadeOut = segmentProgress(elapsedSeconds, 0.7, 0.92);
-  const finalAlpha = alpha * (1 - easeOutQuad(fadeOut));
+  const finalAlpha = alpha * effectLifecycleFadeMultiplier(elapsedSeconds);
 
   setLayerAlpha(layer, finalAlpha);
 
@@ -339,7 +372,8 @@ function updateEnergyBackLayer(layer: EffectLayer, elapsedSeconds: number): void
 }
 
 function updateParticlesLayer(layer: EffectLayer, elapsedSeconds: number): void {
-  const progress = segmentProgress(elapsedSeconds, 0.1, 0.34);
+  const particleStart = introKeyframe(0.1);
+  const progress = segmentProgress(elapsedSeconds, particleStart, introKeyframe(0.34));
 
   if (progress <= 0) {
     setLayerAlpha(layer, 0);
@@ -348,10 +382,9 @@ function updateParticlesLayer(layer: EffectLayer, elapsedSeconds: number): void 
 
   const frameIndex = Math.min(
     PARTICLE_FRAME_COUNT,
-    Math.max(1, Math.floor((elapsedSeconds - 0.1) / PARTICLE_FRAME_STEP_SECONDS) + 1)
+    Math.max(1, Math.floor((elapsedSeconds - particleStart) / PARTICLE_FRAME_STEP_SECONDS) + 1)
   );
-  const fadeOut = segmentProgress(elapsedSeconds, 0.7, 0.92);
-  const alpha = (1 - easeOutQuad(fadeOut)) * clamp01(progress <= 0 ? 0 : 1);
+  const alpha = effectLifecycleFadeMultiplier(elapsedSeconds) * clamp01(progress <= 0 ? 0 : 1);
 
   setLayerAlpha(layer, alpha);
 
@@ -363,15 +396,14 @@ function updateParticlesLayer(layer: EffectLayer, elapsedSeconds: number): void 
 }
 
 function updateSheenLayer(layer: EffectLayer, elapsedSeconds: number, settleY: number): void {
-  const progress = segmentProgress(elapsedSeconds, 0.16, 0.45);
+  const progress = segmentProgress(elapsedSeconds, introKeyframe(0.16), introKeyframe(0.45));
 
   if (progress <= 0 || progress >= 1) {
     setLayerAlpha(layer, 0);
     return;
   }
 
-  const fadeOut = segmentProgress(elapsedSeconds, 0.7, 0.92);
-  const alpha = lerp(0.85, 0, easeOutQuad(progress)) * (1 - easeOutQuad(fadeOut));
+  const alpha = lerp(0.85, 0, easeOutQuad(progress)) * effectLifecycleFadeMultiplier(elapsedSeconds);
 
   setLayerAlpha(layer, alpha);
 
@@ -392,50 +424,57 @@ function updateSheenLayer(layer: EffectLayer, elapsedSeconds: number, settleY: n
 
 function updateOptionalLayer(layer: EffectLayer, elapsedSeconds: number, startSeconds: number, endSeconds: number): void {
   const progress = segmentProgress(elapsedSeconds, startSeconds, endSeconds);
-  const fadeOut = segmentProgress(elapsedSeconds, 0.7, 0.92);
-  const alpha = clamp01(progress) * (1 - easeOutQuad(fadeOut));
+  const alpha = clamp01(progress) * effectLifecycleFadeMultiplier(elapsedSeconds);
 
   setLayerAlpha(layer, alpha);
 }
 
 function updateTimeline(effect: SpellEffectInstance, elapsedSeconds: number): void {
+  const settleEnd = introKeyframe(0.8);
   const settleY =
-    elapsedSeconds >= 0.48 && elapsedSeconds <= 0.8
-      ? lerp(0, -6 * EFFECT_DISPLAY_SCALE, segmentProgress(elapsedSeconds, 0.48, 0.8))
+    elapsedSeconds >= introKeyframe(0.48) && elapsedSeconds <= settleEnd
+      ? lerp(0, -6 * EFFECT_DISPLAY_SCALE, segmentProgress(elapsedSeconds, introKeyframe(0.48), settleEnd))
       : 0;
-  const rootFade = segmentProgress(elapsedSeconds, 0.7, EFFECT_DURATION_SECONDS);
-  const rootAlpha = 1 - easeOutQuad(rootFade);
+  const rootAlpha = effectLifecycleFadeMultiplier(elapsedSeconds);
   const rootScale =
-    elapsedSeconds < 0.08
-      ? lerp(0.92, 1.08, easeOutQuad(segmentProgress(elapsedSeconds, 0, 0.08)))
-      : elapsedSeconds < 0.2
-        ? lerp(1.08, 1, easeOutQuad(segmentProgress(elapsedSeconds, 0.08, 0.2)))
-        : lerp(1, 1.03, easeOutQuad(segmentProgress(elapsedSeconds, 0.7, EFFECT_DURATION_SECONDS)));
+    elapsedSeconds < introKeyframe(0.08)
+      ? lerp(0.92, 1.08, easeOutQuad(segmentProgress(elapsedSeconds, 0, introKeyframe(0.08))))
+      : elapsedSeconds < introKeyframe(0.2)
+        ? lerp(1.08, 1, easeOutQuad(segmentProgress(elapsedSeconds, introKeyframe(0.08), introKeyframe(0.2))))
+        : 1;
 
   effect.root.SetAlpha?.(rootAlpha);
   effect.root.SetScale(rootScale * getSpellEffectUserScale());
 
   if (effect.assets?.atmosphere !== undefined) {
-    updateOptionalLayer(effect.atmosphere, elapsedSeconds, 0, 0.92);
+    updateOptionalLayer(effect.atmosphere, elapsedSeconds, 0, EFFECT_INTRO_SECONDS);
   }
 
   updateFlashLayer(effect.impactFlash, elapsedSeconds);
 
   if (effect.assets?.inkBurst !== undefined) {
-    updateOptionalLayer(effect.inkBurst, elapsedSeconds, 0.03, 0.35);
+    updateOptionalLayer(effect.inkBurst, elapsedSeconds, introKeyframe(0.03), introKeyframe(0.35));
   }
 
   updateEnergyBackLayer(effect.energyBack, elapsedSeconds);
   updateParticlesLayer(effect.particles, elapsedSeconds);
-  updatePopLayer(effect.textShadow, elapsedSeconds, 0.06, 0.2, settleY);
-  updatePopLayer(effect.textMain, elapsedSeconds, 0.06, 0.2, settleY);
+
+  const popStart = introKeyframe(0.06);
+  const popEnd = introKeyframe(0.2);
+
+  if (effect.assets?.usesFontText === true) {
+    updatePopFontText(effect.fontText.label, effect.fontText.parent, elapsedSeconds, popStart, popEnd, settleY);
+  } else {
+    updatePopLayer(effect.textShadow, elapsedSeconds, popStart, popEnd, settleY);
+    updatePopLayer(effect.textMain, elapsedSeconds, popStart, popEnd, settleY);
+  }
 
   if (effect.assets?.energyFront !== undefined) {
-    updateOptionalLayer(effect.energyFront, elapsedSeconds, 0.12, 0.42);
+    updateOptionalLayer(effect.energyFront, elapsedSeconds, introKeyframe(0.12), introKeyframe(0.42));
   }
 
   if (effect.assets?.speedLines !== undefined) {
-    updateOptionalLayer(effect.speedLines, elapsedSeconds, 0.06, 0.28);
+    updateOptionalLayer(effect.speedLines, elapsedSeconds, introKeyframe(0.06), introKeyframe(0.28));
   }
 
   if (effect.assets?.textSheen !== undefined) {
@@ -445,7 +484,18 @@ function updateTimeline(effect: SpellEffectInstance, elapsedSeconds: number): vo
   enforceEffectDrawOrder(effect);
 }
 
+function hideFontText(fontText: FontTextOverlay): void {
+  fontText.enabled = false;
+  fontText.label.Hide();
+  fontText.label.SetAlpha?.(0);
+}
+
 function hideAllLayers(effect: SpellEffectInstance): void {
+  if (effect.fontText.enabled) {
+    effect.fontText.label.Hide();
+    effect.fontText.label.SetAlpha?.(0);
+  }
+
   for (const layer of getOrderedLayers(effect)) {
     resetLayer(layer);
   }
@@ -472,10 +522,20 @@ export function createSpellEffectInstance(nameSuffix: string): SpellEffectInstan
     highlight: createLayerMount(root, `${effectName}HighlightMount`, LAYER_MOUNT_LEVEL.highlight)
   };
 
+  const textMount = mounts.text;
+  const fontLabel = textMount.CreateFontString(`${effectName}FontText`, "OVERLAY");
+  fontLabel.SetPoint("CENTER", textMount, "CENTER", 0, 0);
+  fontLabel.Hide();
+
   const effect: SpellEffectInstance = {
     root,
     active: false,
     startTime: 0,
+    fontText: {
+      label: fontLabel,
+      parent: textMount,
+      enabled: false
+    },
     impactFlash: createLayer(
       mounts.back,
       "ImpactFlash",
@@ -574,11 +634,12 @@ export function createSpellEffectInstance(nameSuffix: string): SpellEffectInstan
       root.ClearAllPoints();
       root.SetPoint("BOTTOM", anchorFrame, "BOTTOM", 0, 0);
     },
-    Configure(slug: SpellAnimationSlug): boolean {
+    Configure(slug: SpellAnimationSlug, displayText: string): boolean {
       const resolved = resolveMvpAssets(slug);
 
       if (resolved === undefined) {
         this.assets = undefined;
+        hideFontText(this.fontText);
         return false;
       }
 
@@ -587,18 +648,39 @@ export function createSpellEffectInstance(nameSuffix: string): SpellEffectInstan
       applyLayerTexture(this.impactFlash, resolved.impactFlash);
       applyLayerTexture(this.energyBack, resolved.energyBack);
       applyLayerTexture(this.particles, resolved.particles);
-      applyLayerTexture(this.textMain, resolved.textMain);
-      applyLayerTexture(this.textShadow, resolved.textShadow);
       applyLayerTexture(this.textSheen, resolved.textSheen);
       applyLayerTexture(this.atmosphere, resolved.atmosphere);
       applyLayerTexture(this.energyFront, resolved.energyFront);
       applyLayerTexture(this.inkBurst, resolved.inkBurst);
       applyLayerTexture(this.speedLines, resolved.speedLines);
 
+      const hasTextTextures =
+        applyLayerTexture(this.textMain, resolved.textMain) &&
+        applyLayerTexture(this.textShadow, resolved.textShadow);
+
+      if (hasTextTextures) {
+        hideFontText(this.fontText);
+      } else {
+        this.textMain.enabled = false;
+        this.textShadow.enabled = false;
+        this.textMain.texture.Hide();
+        this.textShadow.texture.Hide();
+        this.fontText.enabled = true;
+        styleCalloutLabel(this.fontText.label, 0);
+        this.fontText.label.SetText(displayText);
+        this.fontText.label.Hide();
+      }
+
       return true;
     },
     Play(): void {
       hideAllLayers(this);
+
+      if (this.fontText.enabled) {
+        this.fontText.label.Show();
+        styleCalloutLabel(this.fontText.label, 0);
+      }
+
       beginPlaybackLayers(this);
       this.active = true;
       this.startTime = GetTime();
@@ -609,7 +691,7 @@ export function createSpellEffectInstance(nameSuffix: string): SpellEffectInstan
         const elapsedSeconds = GetTime() - this.startTime;
         updateTimeline(this, elapsedSeconds);
 
-        if (elapsedSeconds >= EFFECT_DURATION_SECONDS) {
+        if (elapsedSeconds >= EFFECT_TOTAL_SECONDS) {
           this.Stop();
         }
       });

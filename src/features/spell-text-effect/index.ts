@@ -20,6 +20,7 @@ import {
 import { getClientCalloutFontSummary, clearClientCalloutFontCache } from "./client-callout-font";
 import { SpellTextEffectBinding, SpellTextEffectRegistry } from "./registry";
 import { ensureSpellTextAnchorFrame, getTextEffectTimingSummary, hideSpellTextOverlay, showTextEffect } from "./text-effect";
+import { getSpellVoiceCalloutStatusLines, tryPlaySpellVoiceCallout } from "../spell-voice-callout";
 
 const CAST_TRIGGER_COOLDOWN_SECONDS = 1;
 const SPELLBOOK_REBUILD_DELAY_SECONDS = 0.2;
@@ -93,6 +94,8 @@ export function showSpellTextEffect(spellId: number | undefined, spellName: stri
     return false;
   }
 
+  tryPlaySpellVoiceCallout(displayText);
+
   setSpellAnimationAnchorFrame(ensureSpellTextAnchorFrame());
 
   const playResult = tryShowSpellAnimationEffect(displayText);
@@ -137,6 +140,7 @@ export function reloadPlayerClassSpellTextBindings(): PlayerClassFileName | unde
 }
 
 export function previewSpellTextEffect(displayText: string = PREVIEW_DISPLAY_TEXT): void {
+  tryPlaySpellVoiceCallout(displayText);
   setSpellAnimationAnchorFrame(ensureSpellTextAnchorFrame());
 
   const playResult = tryShowSpellAnimationEffect(displayText);
@@ -175,6 +179,11 @@ export function printSpellTextEffectStatus(): void {
   for (const line of getSpellAnimationAssetStatusLines(PREVIEW_DISPLAY_TEXT)) {
     addonPrint(`Animation asset ${line}`);
   }
+
+  for (const line of getSpellVoiceCalloutStatusLines(PREVIEW_DISPLAY_TEXT)) {
+    addonPrint(line);
+  }
+
   addonPrint(`Bindings: ${bindings.length}`);
   addonPrint(`Tracked spell IDs: ${trackedIds.length > 0 ? trackedIds.join(", ") : "none (check skill names)"}`);
   addonPrint(`Watch names: ${watchNames}`);
