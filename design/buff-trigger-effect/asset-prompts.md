@@ -6,7 +6,7 @@ Runtime asset root: `Interface\AddOns\SlayerUI\assets\buff-effects\`
 Design doc: `design/buff-trigger-effect/README.md`  
 Reference taxonomy: `design/ds_skills.md`
 
-This catalog creates one reusable buff-trigger effect preset for each breathing style and one for Blood Demon Art. Buffs map to style presets at runtime; they do not need their own unique art.
+This catalog creates one reusable buff-trigger effect preset for each breathing style and one for Blood Demon Art. Buffs map to style presets at runtime; they do not need their own unique art. The `indicator_core` asset intentionally includes one large style glyph so players can identify the triggered style when several effects fire close together.
 
 Important: make original assets. Do not use Demon Slayer screenshots, logos, character art, game captures, anime frames, manga panels, official fonts, or extracted textures. The direction is "anime-inspired elemental brush UI effect," not copied franchise art.
 
@@ -60,7 +60,7 @@ Full catalog:
 
 Prepend this to every generated asset prompt:
 
-> Original anime-inspired 2D fantasy game UI buff trigger effect asset, transparent background, no frame, no border, no character, no logo, no screenshot, bold ink-brush linework, stylized Japanese sword-technique energy, strong silhouette readable over busy World of Warcraft combat backgrounds, clean alpha edges, no white matte fringe, no text, no letters, no glyphs, centered composition, suitable for layered addon UI texture compositing.
+> Original anime-inspired 2D fantasy game UI buff trigger effect asset, transparent background, no frame, no border, no character, no logo, no screenshot, bold ink-brush linework, stylized Japanese sword-technique energy, strong silhouette readable over busy World of Warcraft combat backgrounds, clean alpha edges, no white matte fringe, centered composition, suitable for layered addon UI texture compositing.
 
 ## Role Prompt Blocks
 
@@ -68,19 +68,41 @@ Combine the global prompt block, one role prompt block, and one style modifier f
 
 ### `indicator_core`
 
-> Compact circular or diamond-shaped elemental crest, designed to read clearly at 80-160 pixels, strong central silhouette, brush-ink contour, small inner energy mark, balanced transparent padding, no text, no numbers, no icon border, no square UI frame.
+> Compact circular or diamond-shaped elemental crest, designed to read clearly at 80-160 pixels, strong central silhouette, brush-ink contour, large exact center glyph `<glyph>` with thick dark outline and bright style-colored fill, balanced transparent padding, no extra text, no numbers, no icon border, no square UI frame.
 
 ### `trigger_burst`
 
-> Wide horizontal buff-trigger burst, fast slash/ring energy expanding outward from center, asymmetric brush strokes, clear negative space near center for the indicator core, high-impact first-frame feel, transparent background, no text.
+> Wide horizontal buff-trigger burst, fast slash/ring energy expanding outward from center, asymmetric brush strokes, clear negative space near center for the indicator core, high-impact first-frame feel, transparent background, no text, no glyphs.
 
 ### `particles_4x4`
 
-> 4x4 sprite sheet with 16 equal cells, each cell a stepped animation frame of style-specific particles emerging then fading, consistent center alignment per cell, transparent background, no grid lines, no text, no frame border.
+> 4x4 sprite sheet with 16 equal cells, each cell a stepped animation frame of style-specific particles emerging then fading, consistent center alignment per cell, transparent background, no grid lines, no text, no glyphs, no frame border.
 
 ### `active_glow`
 
-> Soft looping aura/glow behind a compact buff indicator, low opacity, subtle pulsing energy, clean circular falloff, readable but not distracting, transparent background, no text, no hard rectangular edges.
+> Soft looping aura/glow behind a compact buff indicator, low opacity, subtle pulsing energy, clean circular falloff, readable but not distracting, transparent background, no text, no glyphs, no hard rectangular edges.
+
+## Indicator Core Glyphs
+
+Use exactly these glyphs in the center of each `indicator_core`.
+
+| Style Slug | Glyph |
+| --- | --- |
+| `sun_breathing` | `日` |
+| `moon_breathing` | `月` |
+| `water_breathing` | `水` |
+| `flame_breathing` | `炎` |
+| `thunder_breathing` | `雷` |
+| `wind_breathing` | `风` |
+| `stone_breathing` | `岩` |
+| `flower_breathing` | `花` |
+| `insect_breathing` | `虫` |
+| `serpent_breathing` | `蛇` |
+| `love_breathing` | `恋` |
+| `mist_breathing` | `霞` |
+| `sound_breathing` | `音` |
+| `beast_breathing` | `兽` |
+| `blood_art` | `血` |
 
 ## Style Slugs And Modifiers
 
@@ -106,7 +128,7 @@ Combine the global prompt block, one role prompt block, and one style modifier f
 
 For `assets/buff-effects/water_breathing/water_breathing_indicator_core.tga`:
 
-> Original anime-inspired 2D fantasy game UI buff trigger effect asset, transparent background, no frame, no border, no character, no logo, no screenshot, bold ink-brush linework, stylized Japanese sword-technique energy, strong silhouette readable over busy World of Warcraft combat backgrounds, clean alpha edges, no white matte fringe, no text, no letters, no glyphs, centered composition, suitable for layered addon UI texture compositing. Compact circular or diamond-shaped elemental crest, designed to read clearly at 80-160 pixels, strong central silhouette, brush-ink contour, small inner energy mark, balanced transparent padding, no text, no numbers, no icon border, no square UI frame. Flowing water ribbon, deep blue and cyan, ukiyo-e wave crests, foam beads, smooth circular current, navy brush outline.
+> Original anime-inspired 2D fantasy game UI buff trigger effect asset, transparent background, no frame, no border, no character, no logo, no screenshot, bold ink-brush linework, stylized Japanese sword-technique energy, strong silhouette readable over busy World of Warcraft combat backgrounds, clean alpha edges, no white matte fringe, centered composition, suitable for layered addon UI texture compositing. Compact circular or diamond-shaped elemental crest, designed to read clearly at 80-160 pixels, strong central silhouette, brush-ink contour, large exact center glyph `水` with thick dark navy outline and bright cyan-white fill, balanced transparent padding, no extra text, no numbers, no icon border, no square UI frame. Flowing water ribbon, deep blue and cyan, ukiyo-e wave crests, foam beads, smooth circular current, navy brush outline.
 
 ## Canonical Effect Catalog
 
@@ -133,7 +155,7 @@ Each row is one complete style effect preset.
 ## Asset QA Checklist
 
 - Transparent alpha, no background plate, no square frame.
-- No text or pseudo-text. This feature uses visual style only.
+- `indicator_core` includes exactly one approved center glyph; other roles contain no text or pseudo-text.
 - Strong silhouette when scaled down to 80 pixels.
 - No pure-white edge matte when composited over dark and bright backgrounds.
 - Centered composition with padding so scale pulses do not crop.

@@ -55,6 +55,26 @@ The effect has two states:
 
 The trigger should feel like the existing spell animation effects: fast pop, strong silhouette, elemental texture, then a clean fade.
 
+The `indicator_core` layer should include a large one-character style glyph so players can identify the triggered style even when color palettes are visually similar:
+
+| Style | Glyph |
+| --- | --- |
+| `sun_breathing` | `日` |
+| `moon_breathing` | `月` |
+| `water_breathing` | `水` |
+| `flame_breathing` | `炎` |
+| `thunder_breathing` | `雷` |
+| `wind_breathing` | `风` |
+| `stone_breathing` | `岩` |
+| `flower_breathing` | `花` |
+| `insect_breathing` | `虫` |
+| `serpent_breathing` | `蛇` |
+| `love_breathing` | `恋` |
+| `mist_breathing` | `霞` |
+| `sound_breathing` | `音` |
+| `beast_breathing` | `兽` |
+| `blood_art` | `血` |
+
 Suggested timeline:
 
 | Time | Layer | Action |
@@ -80,7 +100,7 @@ Default placement:
 - Anchor: `CENTER`, `UIParent`, `CENTER`
 - Offset: `x = 0`, `y = 120`
 - Scale: `1.0`
-- Area size before scale: `420x300`
+- Area size before scale: `760x480`
 - Frame strata: `FULLSCREEN_DIALOG`
 - Frame level: above spell text fallback and near spell animation effects
 
@@ -90,8 +110,8 @@ Recommended root size:
 
 ```text
 BuffTriggerEffectArea
-  width: 420
-  height: 300
+  width: 760
+  height: 480
   frame strata: FULLSCREEN_DIALOG
   frame level: spell animation level + 2
 
@@ -123,6 +143,20 @@ Options menu behavior:
 - Reset restores default scale `1.0`, offset `0, 120`.
 
 Implementation note: the buff feature can reuse layout editor helper patterns from `spell-animation-effect/layout-editor.ts`, but it should store and apply its own settings. This keeps spell cast title-card placement and buff proc placement independently tunable.
+
+### Style Slots
+
+Each style effect should use a deterministic slot inside `BuffTriggerEffectArea`. This prevents simultaneous buffs from stacking directly on top of each other while keeping the whole cluster movable as one player-configurable area.
+
+Default slot map:
+
+| Row | Slot 1 | Slot 2 | Slot 3 | Slot 4 | Slot 5 |
+| --- | --- | --- | --- | --- | --- |
+| Top `y = 110` | `sun_breathing` `x = -240` | `moon_breathing` `x = -120` | `water_breathing` `x = 0` | `flame_breathing` `x = 120` | `thunder_breathing` `x = 240` |
+| Middle `y = 0` | `wind_breathing` `x = -240` | `stone_breathing` `x = -120` | `flower_breathing` `x = 0` | `insect_breathing` `x = 120` | `serpent_breathing` `x = 240` |
+| Bottom `y = -110` | `love_breathing` `x = -240` | `mist_breathing` `x = -120` | `sound_breathing` `x = 0` | `beast_breathing` `x = 120` | `blood_art` `x = 240` |
+
+If two buffs with the same style are active, they may reuse the same slot; the important rule is that different styles do not collapse to the same center point.
 
 ## Runtime Architecture
 

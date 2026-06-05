@@ -5,7 +5,7 @@ import {
   type BuffEffectInstanceMode,
   type BuffTriggerEffectInstance
 } from "./effect-instance";
-import { ensureBuffTriggerEffectArea } from "./layout-settings";
+import { ensureBuffTriggerEffectArea, getBuffTriggerStyleOffset } from "./layout-settings";
 import type { BuffTriggerStyleSlug } from "./style-slugs";
 
 export type BuffTriggerPlayResult =
@@ -74,6 +74,11 @@ function unbindEffectFromAura(auraKey: string): void {
   delete activeByAuraKey[auraKey];
 }
 
+function positionEffectForStyle(effect: BuffTriggerEffectInstance, styleSlug: BuffTriggerStyleSlug): void {
+  const offset = getBuffTriggerStyleOffset(styleSlug);
+  effect.SetAnchorFrame(ensureBuffTriggerEffectArea(), offset.x, offset.y);
+}
+
 export function preloadBuffTriggerEffectPool(): void {
   ensureBuffTriggerEffectArea();
 
@@ -107,6 +112,7 @@ export function activateBuffTriggerEffect(
       return "missing_assets";
     }
 
+    positionEffectForStyle(effect, styleSlug);
     effect.PlayIntro(auraKey, introOnly);
     return "played";
   }
@@ -116,6 +122,8 @@ export function activateBuffTriggerEffect(
   if (effect === undefined || !effect.Configure(styleSlug)) {
     return effect === undefined ? "pool_unavailable" : "missing_assets";
   }
+
+  positionEffectForStyle(effect, styleSlug);
 
   if (!introOnly) {
     bindEffectToAura(auraKey, effect);

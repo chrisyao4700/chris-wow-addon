@@ -48,7 +48,7 @@ export type BuffTriggerEffectInstance = {
   indicatorCore: EffectLayer;
   particles: EffectLayer;
   activeGlow: EffectLayer;
-  SetAnchorFrame: (anchorFrame: WowFrame) => void;
+  SetAnchorFrame: (anchorFrame: WowFrame, offsetX?: number, offsetY?: number) => void;
   Configure: (styleSlug: BuffTriggerStyleSlug) => boolean;
   /** Plays intro; enters hold when introOnly is false. */
   PlayIntro: (auraKey: string, introOnly: boolean) => void;
@@ -319,10 +319,10 @@ export function createBuffTriggerEffectInstance(nameSuffix: string): BuffTrigger
     indicatorCore: createLayer(root, "IndicatorCore", "BLEND", 160, 160),
     particles: createLayer(root, "Particles", "BLEND", 256, 256),
     activeGlow: createLayer(root, "ActiveGlow", "ADD", 300, 220),
-    SetAnchorFrame(anchorFrame: WowFrame): void {
+    SetAnchorFrame(anchorFrame: WowFrame, offsetX = 0, offsetY = 0): void {
       root.SetParent(anchorFrame);
       root.ClearAllPoints();
-      root.SetPoint("CENTER", anchorFrame, "CENTER", 0, 0);
+      root.SetPoint("CENTER", anchorFrame, "CENTER", offsetX, offsetY);
       anchorFrame.Show();
     },
     Configure(styleSlug: BuffTriggerStyleSlug): boolean {
