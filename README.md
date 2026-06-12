@@ -107,7 +107,7 @@ Build output:
 | `build/main.lua` | Raw TypeScriptToLua output |
 | `main.lua` | Root Lua entry copied into the addon package |
 | `dist/SlayerUI/` | Installable addon folder |
-| `dist/SlayerUI-0.1.0.zip` | Release zip (`npm run package`) |
+| `dist/SlayerUI-1.0.0.zip` | Release zip (`npm run package`) |
 
 ### Dev loop
 
@@ -177,7 +177,7 @@ Before publishing:
 1. Create the addon project on CurseForge.
 2. Replace `## X-Curse-Project-ID: 0` in `SlayerUI.toc` with your project ID.
 3. Add a GitHub repository secret named `CF_API_KEY`.
-4. Push a version tag such as `v0.1.0`.
+4. Push a version tag such as `v1.0.0`.
 
 The workflow runs `npm ci`, `npm run build`, and publishes the packaged release.
 
