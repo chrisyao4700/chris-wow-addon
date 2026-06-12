@@ -148,7 +148,14 @@ interface WowTexture {
   SetVertexColor?(red: number, green: number, blue: number, alpha?: number): void;
   SetBlendMode?(mode: "ADD" | "BLEND" | "MOD" | string): void;
   SetDrawLayer?(layer: string, subLevel?: number): void;
+  SetRotation?(radians: number, normalizedRotationPointX?: number, normalizedRotationPointY?: number): void;
   SetWidth?(width: number): void;
+}
+
+interface WowScrollFrame extends WowFrame {
+  SetScrollChild(child: WowFrame): void;
+  GetScrollChild(): WowFrame | undefined;
+  UpdateScrollChildRect?(): void;
 }
 
 interface WowOptionsPanel extends WowFrame {
@@ -214,6 +221,12 @@ declare function CreateFrame(
   parent?: WowFrame,
   template?: string
 ): WowSlider;
+declare function CreateFrame(
+  frameType: "ScrollFrame",
+  name?: string,
+  parent?: WowFrame,
+  template?: string
+): WowScrollFrame;
 
 declare function hooksecurefunc(
   target: string | ((...args: unknown[]) => void),

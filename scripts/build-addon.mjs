@@ -90,6 +90,21 @@ async function copyBuildArtifacts() {
     await cp(buffEffectAssetsDir, join(distAssets, "buff-effects"), { recursive: true });
   }
 
+  const cursorEffectAssetsDir = join(paths.assets, "cursor-effects");
+
+  if (existsSync(cursorEffectAssetsDir)) {
+    const distCursorEffectsDir = join(distAssets, "cursor-effects");
+    const cursorAssets = await readdir(cursorEffectAssetsDir, { withFileTypes: true });
+
+    await mkdir(distCursorEffectsDir, { recursive: true });
+
+    for (const asset of cursorAssets) {
+      if (asset.isFile() && /\.(blp|tga)$/i.test(asset.name)) {
+        await copyFile(join(cursorEffectAssetsDir, asset.name), join(distCursorEffectsDir, asset.name));
+      }
+    }
+  }
+
   const spellVoiceAssetsDir = join(paths.assets, "spell-voices");
 
   if (existsSync(spellVoiceAssetsDir)) {

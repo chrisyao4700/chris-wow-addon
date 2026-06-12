@@ -20,6 +20,7 @@ type Messages = {
   spellVoiceCalloutVolume: string;
   spellVoiceCalloutVolumeValue(value: number): string;
   enableDemonSlayerSystemButtons: string;
+  enableDemonSlayerCursorTrail: string;
   spellEffectLayoutHeader: string;
   spellEffectLayoutScale: string;
   spellEffectLayoutScaleValue(value: number): string;
@@ -47,7 +48,7 @@ type Messages = {
 };
 
 const enUS: Messages = {
-  help: `Commands: ${SLASH_ALIASES.short}, ${SLASH_ALIASES.short} stats, ${SLASH_ALIASES.short} reset, ${SLASH_ALIASES.short} debug, ${SLASH_ALIASES.short} layout, ${SLASH_ALIASES.short} effect, ${SLASH_ALIASES.short} effect test, ${SLASH_ALIASES.short} effect layout, ${SLASH_ALIASES.short} buff, ${SLASH_ALIASES.short} buff test, ${SLASH_ALIASES.short} buff layout, ${SLASH_ALIASES.short} buttons, ${SLASH_ALIASES.short} options`,
+  help: `Commands: ${SLASH_ALIASES.short}, ${SLASH_ALIASES.short} stats, ${SLASH_ALIASES.short} reset, ${SLASH_ALIASES.short} debug, ${SLASH_ALIASES.short} layout, ${SLASH_ALIASES.short} effect, ${SLASH_ALIASES.short} effect test, ${SLASH_ALIASES.short} effect layout, ${SLASH_ALIASES.short} buff, ${SLASH_ALIASES.short} buff test, ${SLASH_ALIASES.short} buff layout, ${SLASH_ALIASES.short} buttons, ${SLASH_ALIASES.short} cursor, ${SLASH_ALIASES.short} options`,
   loaded: `loaded. Try ${SLASH_ALIASES.short}.`,
   reset: "Saved launch count reset.",
   stats: count => `Loaded ${count} time(s) on this account.`,
@@ -66,6 +67,7 @@ const enUS: Messages = {
   spellVoiceCalloutVolume: "Skill voice volume",
   spellVoiceCalloutVolumeValue: value => `${Math.round(value * 100)}%`,
   enableDemonSlayerSystemButtons: "Demon Slayer menu bar buttons",
+  enableDemonSlayerCursorTrail: "Sun Breathing cursor slash trail",
   spellEffectLayoutHeader: "Spell effect layout",
   spellEffectLayoutScale: "Effect scale",
   spellEffectLayoutScaleValue: value => `${value.toFixed(2)}x`,
@@ -93,7 +95,7 @@ const enUS: Messages = {
 };
 
 const zhCN: Messages = {
-  help: `命令：${SLASH_ALIASES.short}、${SLASH_ALIASES.short} stats、${SLASH_ALIASES.short} reset、${SLASH_ALIASES.short} debug、${SLASH_ALIASES.short} layout、${SLASH_ALIASES.short} effect、${SLASH_ALIASES.short} effect test、${SLASH_ALIASES.short} effect layout、${SLASH_ALIASES.short} buff、${SLASH_ALIASES.short} buff test、${SLASH_ALIASES.short} buff layout、${SLASH_ALIASES.short} buttons、${SLASH_ALIASES.short} options`,
+  help: `命令：${SLASH_ALIASES.short}、${SLASH_ALIASES.short} stats、${SLASH_ALIASES.short} reset、${SLASH_ALIASES.short} debug、${SLASH_ALIASES.short} layout、${SLASH_ALIASES.short} effect、${SLASH_ALIASES.short} effect test、${SLASH_ALIASES.short} effect layout、${SLASH_ALIASES.short} buff、${SLASH_ALIASES.short} buff test、${SLASH_ALIASES.short} buff layout、${SLASH_ALIASES.short} buttons、${SLASH_ALIASES.short} cursor、${SLASH_ALIASES.short} options`,
   loaded: `已加载。输入 ${SLASH_ALIASES.short} 查看命令。`,
   reset: "已重置加载次数。",
   stats: count => `此账号已加载 ${count} 次。`,
@@ -112,6 +114,7 @@ const zhCN: Messages = {
   spellVoiceCalloutVolume: "技能语音音量",
   spellVoiceCalloutVolumeValue: value => `${Math.round(value * 100)}%`,
   enableDemonSlayerSystemButtons: "鬼灭之刃风格菜单栏按钮",
+  enableDemonSlayerCursorTrail: "日之呼吸光标火焰斩",
   spellEffectLayoutHeader: "技能特效布局",
   spellEffectLayoutScale: "特效缩放",
   spellEffectLayoutScaleValue: value => `${value.toFixed(2)}x`,

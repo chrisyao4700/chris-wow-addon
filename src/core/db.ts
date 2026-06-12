@@ -14,6 +14,7 @@ export type SlayerUISettings = {
   buffTriggerEffectUserScale?: number;
   buffTriggerEffectOffsetX?: number;
   buffTriggerEffectOffsetY?: number;
+  enableDemonSlayerCursorTrail?: boolean;
 };
 
 export type SlayerUIState = {
@@ -64,7 +65,8 @@ export function getSettings(): ResolvedSlayerUISettings {
     enableBuffTriggerEffect: state.settings.enableBuffTriggerEffect,
     buffTriggerEffectUserScale: state.settings.buffTriggerEffectUserScale ?? 1,
     buffTriggerEffectOffsetX: state.settings.buffTriggerEffectOffsetX ?? 0,
-    buffTriggerEffectOffsetY: state.settings.buffTriggerEffectOffsetY ?? 120
+    buffTriggerEffectOffsetY: state.settings.buffTriggerEffectOffsetY ?? 120,
+    enableDemonSlayerCursorTrail: state.settings.enableDemonSlayerCursorTrail !== false
   };
 }
 
@@ -160,6 +162,16 @@ export function setEnableDemonSlayerSystemButtons(enableDemonSlayerSystemButtons
   }
 
   state.settings.enableDemonSlayerSystemButtons = enableDemonSlayerSystemButtons;
+}
+
+export function setEnableDemonSlayerCursorTrail(enableDemonSlayerCursorTrail: boolean): void {
+  const state = ensureSavedVariables();
+
+  if (state.settings === undefined) {
+    state.settings = {};
+  }
+
+  state.settings.enableDemonSlayerCursorTrail = enableDemonSlayerCursorTrail;
 }
 
 export function setShowMinimapButton(showMinimapButton: boolean): void {

@@ -5,6 +5,7 @@ import {
   getSettings,
   resetLaunchCount,
   setEnableCustomActionLayout,
+  setEnableDemonSlayerCursorTrail,
   setEnableDemonSlayerSystemButtons,
   setEnableSpellTextEffect,
   setEnableSpellVoiceCallouts,
@@ -39,6 +40,7 @@ import {
   MIN_SPELL_VOICE_CALLOUT_VOLUME
 } from "../features/spell-voice-callout";
 import { syncDemonSlayerSystemButtons } from "../features/system-buttons";
+import { syncDemonSlayerCursorTrail } from "../features/cursor-trail";
 import { addonPrint } from "../platform/wow";
 
 type SettingsPanelHandlers = {
@@ -48,6 +50,7 @@ type SettingsPanelHandlers = {
   onSpellEffectLayoutChanged: () => void;
   onBuffTriggerLayoutChanged: () => void;
   onDemonSlayerSystemButtonsChanged: () => void;
+  onDemonSlayerCursorTrailChanged: () => void;
 };
 
 type SettingsPanelControls = {
@@ -69,9 +72,13 @@ type SettingsPanelControls = {
   buffTriggerAdjustButton?: WowButton;
   buffTriggerResetButton?: WowButton;
   demonSlayerSystemButtonsCheckbox?: WowCheckButton;
+  demonSlayerCursorTrailCheckbox?: WowCheckButton;
   minimapCheckbox?: WowCheckButton;
   loginCheckbox?: WowCheckButton;
 };
+
+const SETTINGS_SCROLL_CHILD_WIDTH = 580;
+const SETTINGS_SCROLL_CHILD_HEIGHT = 900;
 
 let panel: WowOptionsPanel | undefined;
 let settingsCategory: WowSettingsCategory | undefined;
@@ -106,7 +113,7 @@ function createCheckbox(
   name: string,
   labelText: string,
   point: WowPoint,
-  relativeTo: WowFrame,
+  relativeTo: WowFrame | WowFontString,
   relativePoint: WowPoint,
   x: number,
   y: number,
@@ -317,6 +324,10 @@ export function refreshSettingsPanel(): void {
     controls.demonSlayerSystemButtonsCheckbox.SetChecked(settings.enableDemonSlayerSystemButtons);
   }
 
+  if (controls.demonSlayerCursorTrailCheckbox !== undefined) {
+    controls.demonSlayerCursorTrailCheckbox.SetChecked(settings.enableDemonSlayerCursorTrail);
+  }
+
   if (controls.minimapCheckbox !== undefined) {
     controls.minimapCheckbox.SetChecked(settings.showMinimapButton);
   }
@@ -385,7 +396,7 @@ export function registerSettingsPanel(settingsPanelHandlers: SettingsPanelHandle
     -16
   );
 
-  createLabel(
+  const description = createLabel(
     optionsPanel,
     messages.settingsDescription,
     "GameFontHighlightSmall",
@@ -396,19 +407,32 @@ export function registerSettingsPanel(settingsPanelHandlers: SettingsPanelHandle
     -8
   );
 
-  controls.launchCount = createLabel(
+  const scrollFrame = CreateFrame(
+    "ScrollFrame",
+    `${ADDON_NAME}OptionsScroll`,
     optionsPanel,
+    "UIPanelScrollFrameTemplate"
+  );
+  scrollFrame.SetPoint("TOPLEFT", description, "BOTTOMLEFT", -4, -12);
+  scrollFrame.SetPoint("BOTTOMRIGHT", optionsPanel, "BOTTOMRIGHT", -28, 16);
+
+  const scrollChild = CreateFrame("Frame", `${ADDON_NAME}OptionsScrollChild`, scrollFrame);
+  scrollFrame.SetScrollChild(scrollChild);
+  scrollChild.SetSize(SETTINGS_SCROLL_CHILD_WIDTH, SETTINGS_SCROLL_CHILD_HEIGHT);
+
+  controls.launchCount = createLabel(
+    scrollChild,
     messages.launchCount(getLaunchCount()),
     "GameFontHighlight",
     "TOPLEFT",
-    optionsPanel,
+    scrollChild,
     "TOPLEFT",
     20,
-    -72
+    -16
   );
 
   controls.featuresHeader = createLabel(
-    optionsPanel,
+    scrollChild,
     messages.settingsFeaturesHeader,
     "GameFontNormal",
     "TOPLEFT",
@@ -419,14 +443,14 @@ export function registerSettingsPanel(settingsPanelHandlers: SettingsPanelHandle
   );
 
   controls.actionLayoutCheckbox = createCheckbox(
-    optionsPanel,
+    scrollChild,
     `${ADDON_NAME}EnableCustomActionLayout`,
     messages.enableCustomActionLayout,
     "TOPLEFT",
-    optionsPanel,
-    "TOPLEFT",
-    20,
-    -128,
+    controls.featuresHeader,
+    "BOTTOMLEFT",
+    0,
+    -8,
     checked => {
       setEnableCustomActionLayout(checked);
       handlers?.onActionLayoutChanged();
@@ -434,7 +458,7 @@ export function registerSettingsPanel(settingsPanelHandlers: SettingsPanelHandle
   );
 
   controls.spellTextEffectCheckbox = createCheckbox(
-    optionsPanel,
+    scrollChild,
     `${ADDON_NAME}EnableSpellTextEffect`,
     messages.enableSpellTextEffect,
     "TOPLEFT",
@@ -455,7 +479,7 @@ export function registerSettingsPanel(settingsPanelHandlers: SettingsPanelHandle
   );
 
   controls.spellVoiceCalloutCheckbox = createCheckbox(
-    optionsPanel,
+    scrollChild,
     `${ADDON_NAME}EnableSpellVoiceCallouts`,
     messages.enableSpellVoiceCallouts,
     "TOPLEFT",
@@ -470,7 +494,7 @@ export function registerSettingsPanel(settingsPanelHandlers: SettingsPanelHandle
   );
 
   const voiceVolumeControls = createSlider(
-    optionsPanel,
+    scrollChild,
     `${ADDON_NAME}SpellVoiceVolume`,
     messages.spellVoiceCalloutVolume,
     "TOPLEFT",
@@ -490,7 +514,7 @@ export function registerSettingsPanel(settingsPanelHandlers: SettingsPanelHandle
   controls.spellVoiceVolumeValue = voiceVolumeControls.valueLabel;
 
   controls.spellEffectLayoutHeader = createLabel(
-    optionsPanel,
+    scrollChild,
     messages.spellEffectLayoutHeader,
     "GameFontNormal",
     "TOPLEFT",
@@ -501,7 +525,7 @@ export function registerSettingsPanel(settingsPanelHandlers: SettingsPanelHandle
   );
 
   const scaleControls = createSlider(
-    optionsPanel,
+    scrollChild,
     `${ADDON_NAME}SpellEffectScale`,
     messages.spellEffectLayoutScale,
     "TOPLEFT",
@@ -521,7 +545,7 @@ export function registerSettingsPanel(settingsPanelHandlers: SettingsPanelHandle
   controls.spellEffectScaleValue = scaleControls.valueLabel;
 
   controls.spellEffectAdjustButton = createButton(
-    optionsPanel,
+    scrollChild,
     `${ADDON_NAME}SpellEffectAdjust`,
     messages.spellEffectLayoutAdjust,
     120,
@@ -548,7 +572,7 @@ export function registerSettingsPanel(settingsPanelHandlers: SettingsPanelHandle
   );
 
   controls.spellEffectResetButton = createButton(
-    optionsPanel,
+    scrollChild,
     `${ADDON_NAME}SpellEffectResetLayout`,
     messages.spellEffectLayoutReset,
     120,
@@ -566,7 +590,7 @@ export function registerSettingsPanel(settingsPanelHandlers: SettingsPanelHandle
   );
 
   controls.buffTriggerLayoutHeader = createLabel(
-    optionsPanel,
+    scrollChild,
     messages.buffTriggerLayoutHeader,
     "GameFontNormal",
     "TOPLEFT",
@@ -577,7 +601,7 @@ export function registerSettingsPanel(settingsPanelHandlers: SettingsPanelHandle
   );
 
   const buffScaleControls = createSlider(
-    optionsPanel,
+    scrollChild,
     `${ADDON_NAME}BuffTriggerScale`,
     messages.buffTriggerLayoutScale,
     "TOPLEFT",
@@ -597,7 +621,7 @@ export function registerSettingsPanel(settingsPanelHandlers: SettingsPanelHandle
   controls.buffTriggerScaleValue = buffScaleControls.valueLabel;
 
   controls.buffTriggerAdjustButton = createButton(
-    optionsPanel,
+    scrollChild,
     `${ADDON_NAME}BuffTriggerAdjust`,
     messages.buffTriggerLayoutAdjust,
     140,
@@ -624,7 +648,7 @@ export function registerSettingsPanel(settingsPanelHandlers: SettingsPanelHandle
   );
 
   controls.buffTriggerResetButton = createButton(
-    optionsPanel,
+    scrollChild,
     `${ADDON_NAME}BuffTriggerResetLayout`,
     messages.buffTriggerLayoutReset,
     140,
@@ -642,7 +666,7 @@ export function registerSettingsPanel(settingsPanelHandlers: SettingsPanelHandle
   );
 
   controls.demonSlayerSystemButtonsCheckbox = createCheckbox(
-    optionsPanel,
+    scrollChild,
     `${ADDON_NAME}EnableDemonSlayerSystemButtons`,
     messages.enableDemonSlayerSystemButtons,
     "TOPLEFT",
@@ -656,12 +680,27 @@ export function registerSettingsPanel(settingsPanelHandlers: SettingsPanelHandle
     }
   );
 
+  controls.demonSlayerCursorTrailCheckbox = createCheckbox(
+    scrollChild,
+    `${ADDON_NAME}EnableDemonSlayerCursorTrail`,
+    messages.enableDemonSlayerCursorTrail,
+    "TOPLEFT",
+    controls.demonSlayerSystemButtonsCheckbox,
+    "BOTTOMLEFT",
+    0,
+    -4,
+    checked => {
+      setEnableDemonSlayerCursorTrail(checked);
+      handlers?.onDemonSlayerCursorTrailChanged();
+    }
+  );
+
   controls.minimapCheckbox = createCheckbox(
-    optionsPanel,
+    scrollChild,
     `${ADDON_NAME}ShowMinimapButton`,
     messages.showMinimapButton,
     "TOPLEFT",
-    controls.demonSlayerSystemButtonsCheckbox,
+    controls.demonSlayerCursorTrailCheckbox,
     "BOTTOMLEFT",
     0,
     -12,
@@ -672,7 +711,7 @@ export function registerSettingsPanel(settingsPanelHandlers: SettingsPanelHandle
   );
 
   controls.loginCheckbox = createCheckbox(
-    optionsPanel,
+    scrollChild,
     `${ADDON_NAME}ShowLoginMessage`,
     messages.showLoginMessage,
     "TOPLEFT",
@@ -686,7 +725,7 @@ export function registerSettingsPanel(settingsPanelHandlers: SettingsPanelHandle
   );
 
   createButton(
-    optionsPanel,
+    scrollChild,
     `${ADDON_NAME}ResetLaunchCount`,
     messages.resetLaunchCount,
     150,
@@ -703,7 +742,7 @@ export function registerSettingsPanel(settingsPanelHandlers: SettingsPanelHandle
   );
 
   createButton(
-    optionsPanel,
+    scrollChild,
     `${ADDON_NAME}PrintDebugInfo`,
     messages.printDebugInfo,
     150,
@@ -727,6 +766,10 @@ export function registerSettingsPanel(settingsPanelHandlers: SettingsPanelHandle
 
   if (getSettings().enableDemonSlayerSystemButtons) {
     syncDemonSlayerSystemButtons();
+  }
+
+  if (getSettings().enableDemonSlayerCursorTrail) {
+    syncDemonSlayerCursorTrail();
   }
 
   if (

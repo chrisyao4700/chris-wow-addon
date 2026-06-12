@@ -22,6 +22,10 @@ import {
   printDemonSlayerSystemButtonStatus,
   syncDemonSlayerSystemButtons
 } from "./features/system-buttons";
+import {
+  printDemonSlayerCursorTrailStatus,
+  syncDemonSlayerCursorTrail
+} from "./features/cursor-trail";
 import { addonPrint, getRuntimeInfo, RuntimeInfo } from "./platform/wow";
 
 let openSettingsPanel: (() => void) | undefined;
@@ -183,6 +187,17 @@ function handleSlashCommand(message?: string): void {
 
     syncDemonSlayerSystemButtons();
     printDemonSlayerSystemButtonStatus();
+    return;
+  }
+
+  if (command === "cursor" || command === "cursor status") {
+    if (!settings.enableDemonSlayerCursorTrail) {
+      addonPrint(messages.featureDisabled(messages.enableDemonSlayerCursorTrail));
+      return;
+    }
+
+    syncDemonSlayerCursorTrail();
+    printDemonSlayerCursorTrailStatus();
     return;
   }
 

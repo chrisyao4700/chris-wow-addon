@@ -19,9 +19,9 @@ export const druidBuffTriggerEffectMapping = defineClassBuffTriggerMapping({
       priority: "high"
     },
     {
-      auraNames: ["Barkskin", "树皮术"],
-      styleSlug: "stone_breathing",
-      priority: "high"
+      auraNames: ["Nature's Grace", "自然之赐"],
+      styleSlug: "wind_breathing",
+      priority: "normal"
     },
     {
       auraNames: ["Savage Roar", "野蛮咆哮"],
@@ -34,14 +34,39 @@ export const druidBuffTriggerEffectMapping = defineClassBuffTriggerMapping({
       priority: "high"
     },
     {
+      auraNames: ["Berserk", "狂暴"],
+      styleSlug: "thunder_breathing",
+      priority: "high"
+    },
+    {
+      auraNames: ["Dash", "急奔"],
+      styleSlug: "wind_breathing",
+      priority: "high"
+    },
+    {
+      auraNames: ["Barkskin", "树皮术"],
+      styleSlug: "stone_breathing",
+      priority: "high"
+    },
+    {
+      auraNames: ["Survival Instincts", "生存本能"],
+      styleSlug: "stone_breathing",
+      priority: "high"
+    },
+    {
+      auraNames: ["Frenzied Regeneration", "狂暴回复"],
+      styleSlug: "stone_breathing",
+      priority: "high"
+    },
+    {
       auraNames: ["Tree of Life", "生命之树"],
       styleSlug: "flower_breathing",
       priority: "normal"
     },
     {
-      auraNames: ["Nature's Grace", "自然之赐"],
-      styleSlug: "wind_breathing",
-      priority: "normal"
+      auraNames: ["Innervate", "激活"],
+      styleSlug: "water_breathing",
+      priority: "high"
     }
   ]
 });

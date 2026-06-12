@@ -11,6 +11,10 @@ import {
   registerDemonSlayerSystemButtons,
   syncDemonSlayerSystemButtons
 } from "./features/system-buttons";
+import {
+  registerDemonSlayerCursorTrail,
+  syncDemonSlayerCursorTrail
+} from "./features/cursor-trail";
 import { registerMinimapButton, syncMinimapButton } from "./ui/minimap";
 import { openSettingsPanel, registerSettingsPanel } from "./ui/options";
 
@@ -20,7 +24,8 @@ registerSettingsPanel({
   onSpellTextEffectChanged: () => syncSpellTextEffect(),
   onSpellEffectLayoutChanged: () => syncSpellAnimationEffect(),
   onBuffTriggerLayoutChanged: () => syncBuffTriggerEffect(),
-  onDemonSlayerSystemButtonsChanged: () => syncDemonSlayerSystemButtons()
+  onDemonSlayerSystemButtonsChanged: () => syncDemonSlayerSystemButtons(),
+  onDemonSlayerCursorTrailChanged: () => syncDemonSlayerCursorTrail()
 });
 registerSlashCommands(openSettingsPanel);
 registerMinimapButton(openSettingsPanel);
@@ -30,5 +35,6 @@ registerSpellTextEffect();
 registerSpellAnimationEffect();
 registerBuffTriggerEffect();
 registerDemonSlayerSystemButtons();
+registerDemonSlayerCursorTrail();
 
 export {};
